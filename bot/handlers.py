@@ -1,4 +1,4 @@
-"""Telegram Bot Command and Message Handlers with Interactive AI Course & 100-Lesson Curriculum Engine."""
+"""Telegram Bot Command and Message Handlers with Interactive AI Course, 100-Lesson Curriculum Engine, & Super Admin Suite."""
 import re
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -15,9 +15,10 @@ from telegram.ext import (
 from config import Config
 from memory.state_manager import StateManager
 from core.evaluator import EvaluatorAgent
-from core.architect import ArchitectAgent
+from core.architect import ArchitectAgent, response_cache
 from core.reviewer import ReviewerAgent
 from core.curriculum import CurriculumEngine, AI_COURSES
+from core.admin import SystemMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,17 @@ architect_agent = ArchitectAgent()
 reviewer_agent = ReviewerAgent()
 
 
+def is_admin(user_id: int) -> bool:
+    """Checks if the user ID matches Config.ADMIN_CHAT_ID."""
+    return user_id == Config.ADMIN_CHAT_ID
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles /start command with a trilingual Polymath Grandmaster greeting."""
     user = update.effective_user
     chat_id = update.effective_chat.id
     state_manager.reset_state(chat_id)
+    SystemMonitor.active_users.add(chat_id)
 
     greeting = (
         f"Greetings <b>{user.first_name}</b>.\n\n"
@@ -46,8 +53,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "/reset - Clear conversation memory\n"
         "/help - View Grandmaster capabilities"
     )
-    
-    # Inline buttons for AI Courses
+
+    if is_admin(user.id):
+        greeting += "\n\n👑 <b>Super Admin Panel Access Authorized:</b> Use /admin to open VIP Dashboard."
+
     keyboard = []
     for key, info in AI_COURSES.items():
         keyboard.append([InlineKeyboardButton(f"{info['emoji']} {info['title']}", callback_data=f"course:{key}:1")])
@@ -73,14 +82,171 @@ async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
 
+async def admin_panel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /admin command for Super Admin Control Panel."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied: Only Super Admin ID 859271875 can execute this command.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    text = (
+        "👑 <b>SUPER ADMIN CONTROL PANEL</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        f"<b>Admin ID:</b> <code>{user.id}</code>\n"
+        f"<b>VIP Alerts:</b> {'🟢 ENABLED' if SystemMonitor.vip_alerts_enabled else '🔴 DISABLED'}\n"
+        f"<b>Active Engine:</b> {'🤖 Local Model' if Config.USE_LOCAL_MODEL else '⚡ Gemini 3.6 Flash'}\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "Select an Admin control tool from the menu below:"
+    )
+
+    keyboard = [
+        [
+            InlineKeyboardButton("📊 VPS System Health", callback_data="admin:status"),
+            InlineKeyboardButton("🤖 AI Models Status", callback_data="admin:models")
+        ],
+        [
+            InlineKeyboardButton(f"🔔 Toggle VIP Alerts ({'ON' if SystemMonitor.vip_alerts_enabled else 'OFF'})", callback_data="admin:toggle_vip"),
+            InlineKeyboardButton("🧹 Flush Cache", callback_data="admin:clearcache")
+        ],
+        [
+            InlineKeyboardButton("🔄 Refresh Dashboard", callback_data="admin:refresh")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.callback_query:
+        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
+
+async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /status command to display detailed VPS CPU, RAM, and Disk metrics."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    health = SystemMonitor.get_vps_health()
+    text = (
+        "📊 <b>VPS SYSTEM HEALTH & BOT SERVICE STATUS</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        f"⚙️ <b>Service Status:</b> 🟢 ACTIVE (running)\n"
+        f"⏱️ <b>Bot Uptime:</b> {health['uptime']}\n"
+        f"💻 <b>CPU Usage:</b> {health['cpu_percent']}%\n"
+        f"🧠 <b>RAM Memory:</b> {health['ram_used_gb']} GB / {health['ram_total_gb']} GB ({health['ram_percent']}%)\n"
+        f"💾 <b>Disk Storage:</b> {health['disk_used_gb']} GB / {health['disk_total_gb']} GB (Free: {health['disk_free_gb']} GB - {health['disk_percent']}%)\n"
+        f"👥 <b>Active Users Count:</b> {health['active_users_count']}\n"
+        "━━━━━━━━━━━━━━━━━━━━━"
+    )
+    if update.callback_query:
+        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+async def models_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /models command to view active AI model & Ollama status."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    status = SystemMonitor.get_ollama_status()
+    models_str = "\n".join([f"  • <code>{m}</code>" for m in status['models_list']]) if status['models_list'] else "  <i>No models installed or server offline</i>"
+
+    text = (
+        "🤖 <b>AI MODEL ENGINE STATUS</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        f"⚡ <b>Active Provider:</b> {status['engine_type']}\n"
+        f"🎯 <b>Current Model:</b> <code>{status['active_model']}</code>\n"
+        f"🌐 <b>Ollama Server (11434):</b> {'🟢 ONLINE' if status['ollama_online'] else '🔴 OFFLINE'}\n\n"
+        f"<b>Installed Ollama Models:</b>\n{models_str}\n"
+        "━━━━━━━━━━━━━━━━━━━━━"
+    )
+    if update.callback_query:
+        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+async def vip_toggle_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /vip command to toggle VIP Live User Activity Alerts."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    SystemMonitor.vip_alerts_enabled = not SystemMonitor.vip_alerts_enabled
+    status_str = "🟢 ENABLED" if SystemMonitor.vip_alerts_enabled else "🔴 DISABLED"
+    text = f"🔔 <b>VIP User Live Activity Alerts</b> are now {status_str}."
+
+    if update.callback_query:
+        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+async def clearcache_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /clearcache command to flush Architect response cache."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    response_cache.clear()
+    text = "🧹 <b>Response Cache Flushed!</b> Instant memory cache cleared successfully."
+    if update.callback_query:
+        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
+
+async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /broadcast <message> to announce to all active users."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    if not context.args:
+        await update.message.reply_text("⚠️ <b>Usage:</b> <code>/broadcast <your message></code>", parse_mode=ParseMode.HTML)
+        return
+
+    broadcast_msg = " ".join(context.args)
+    count = 0
+    for uid in list(SystemMonitor.active_users):
+        try:
+            await context.bot.send_message(chat_id=uid, text=f"📢 <b>ANNOUNCEMENT:</b>\n\n{broadcast_msg}", parse_mode=ParseMode.HTML)
+            count += 1
+        except Exception:
+            pass
+
+    await update.message.reply_text(f"✅ Broadcast sent successfully to {count} users.", parse_mode=ParseMode.HTML)
+
+
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles interactive button taps for course selection, lesson navigation, and lesson execution."""
+    """Handles interactive button taps for course selection, admin controls, and lesson execution."""
     query = update.callback_query
     await query.answer()
     data = query.data
 
     parts = data.split(":")
     action = parts[0]
+
+    if action == "admin":
+        sub = parts[1]
+        if sub == "status":
+            await status_command(update, context)
+        elif sub == "models":
+            await models_command(update, context)
+        elif sub == "toggle_vip":
+            await vip_toggle_command(update, context)
+        elif sub == "clearcache":
+            await clearcache_command(update, context)
+        elif sub == "refresh":
+            await admin_panel_command(update, context)
+        return
 
     if action == "course":
         course_key = parts[1]
@@ -102,7 +268,6 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
             l_title = CurriculumEngine.get_lesson_title(course_key, l_num, lang="km")
             keyboard.append([InlineKeyboardButton(f"📖 {l_title}", callback_data=f"lesson:{course_key}:{l_num}")])
 
-        # Pagination row
         nav_row = []
         if page > 1:
             nav_row.append(InlineKeyboardButton("◀ ថយក្រោយ", callback_data=f"course:{course_key}:{page-1}"))
@@ -126,7 +291,6 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
         await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
-        # Generate complete masterclass prompt
         prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
         user_state = state_manager.get_state(chat_id)
         intent = evaluator_agent.analyze(prompt)
@@ -137,7 +301,14 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         user_state.add_turn(role="user", content=f"Lesson Request: {lesson_title}")
         user_state.add_turn(role="model", content=sanitized)
 
-        # Navigation buttons for next lesson
+        # Notify admin of live activity
+        await SystemMonitor.notify_admin_live_activity(
+            bot=context.bot,
+            user=update.effective_user,
+            query=f"Requested Lesson: {lesson_title}",
+            response=sanitized
+        )
+
         keyboard = [
             [
                 InlineKeyboardButton("📖 មេរៀនបន្ទាប់ ▶", callback_data=f"lesson:{course_key}:{min(100, lesson_num+1)}"),
@@ -148,7 +319,7 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
         try:
             await query.message.reply_text(sanitized, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-        except Exception as e:
+        except Exception:
             plain_text = re.sub(r"<[^>]+>", "", sanitized)
             await query.message.reply_text(plain_text, reply_markup=reply_markup)
 
@@ -190,9 +361,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_state.add_turn(role="user", content=user_query)
     user_state.add_turn(role="model", content=sanitized_response)
 
+    # Notify admin of live VIP user activity
+    await SystemMonitor.notify_admin_live_activity(
+        bot=context.bot,
+        user=update.effective_user,
+        query=user_query,
+        response=sanitized_response
+    )
+
     try:
         await update.message.reply_text(sanitized_response, parse_mode=ParseMode.HTML)
-    except Exception as e:
+    except Exception:
         plain_text = re.sub(r"<[^>]+>", "", sanitized_response)
         await update.message.reply_text(plain_text)
 
@@ -204,5 +383,14 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("courses", ai_courses_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("reset", reset_command))
+    
+    # Admin commands
+    application.add_handler(CommandHandler("admin", admin_panel_command))
+    application.add_handler(CommandHandler("status", status_command))
+    application.add_handler(CommandHandler("models", models_command))
+    application.add_handler(CommandHandler("vip", vip_toggle_command))
+    application.add_handler(CommandHandler("clearcache", clearcache_command))
+    application.add_handler(CommandHandler("broadcast", broadcast_command))
+
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))

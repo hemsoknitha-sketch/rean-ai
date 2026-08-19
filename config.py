@@ -30,6 +30,7 @@ class Config:
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434").strip()
     LOCAL_MODEL_NAME: str = os.getenv("LOCAL_MODEL_NAME", "qwen2.5:7b-instruct").strip()
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+    ADMIN_CHAT_ID: int = int(os.getenv("ADMIN_CHAT_ID", "859271875"))
 
 
 
