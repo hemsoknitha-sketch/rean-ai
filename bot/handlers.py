@@ -770,16 +770,19 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles /help command detailing cognitive features."""
+    """Handles /help command detailing cognitive features in 100% Khmer."""
     help_text = (
-        "<b>Polymath AI Grandmaster Architecture:</b>\n\n"
-        "1. <b>100-Lesson Master Curriculum:</b> Access 100 detailed lessons per AI subject using /ai command.\n"
-        "2. <b>First-Principles Deconstruction:</b> Complex technical concepts translated into clear intuition.\n"
-        "3. <b>Multi-Agent Reasoning:</b> Evaluator classification -> Architect synthesis -> Reviewer sanitization.\n"
-        "4. <b>Sliding-Window Memory:</b> Remembers prior dialogue context automatically.\n\n"
-        "Use /ai to browse courses or /reset to start a fresh thread."
+        "✨ <b>ស្ថាបត្យកម្ម POLYMATH AI GRANDMASTER</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "១. <b>១០០ មេរៀនក្នុង ១ ជំនាញ (100-Lesson Master Curriculum) ៖</b> ចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន ដោយប្រើប្រាស់បញ្ជា <b>/ai</b>។\n"
+        "២. <b>បំបែកគំនិតស្មុគស្មាញ (First-Principles Deconstruction) ៖</b> បំប្លែងទ្រឹស្តី និងកូដស្មុគស្មាញ ទៅជាការយល់ដឹងបែបធម្មជាតិ និងច្បាស់លាស់។\n"
+        "៣. <b>បណ្តាញខួរក្បាល Multi-Agent ៖</b> ប្រព័ន្ធស្កែនបំណង (Evaluator) -> ប្រព័ន្ធបង្កើតចម្លើយ (Architect) -> ប្រព័ន្ធកែសម្រួលអក្សរសាស្ត្រ (Reviewer)។\n"
+        "៤. <b>ប្រព័ន្ធចងចាំបរិបទសន្ទនា (Sliding-Window Memory) ៖</b> ចងចាំប្រវត្តិសន្ទនាស្វ័យប្រវត្តិ។\n\n"
+        "💡 ប្រើប្រាស់ <b>/ai</b> ដើម្បីមើលបញ្ជីមេរៀន ឬ <b>/reset</b> ដើម្បីលុបប្រវត្តិសន្ទនាចាស់។\n"
+        "━━━━━━━━━━━━━━━━━━━━━"
     )
     await update.message.reply_text(help_text, parse_mode=ParseMode.HTML)
+
 
 
 async def reset_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -850,7 +853,10 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("addvip", addvip_command))
     application.add_handler(CommandHandler("addsupervip", addsupervip_command))
     application.add_handler(CommandHandler("delvip", delvip_command))
+    application.add_handler(CommandHandler("delsupervip", delvip_command))
     application.add_handler(CommandHandler("viplist", viplist_command))
+    application.add_handler(CommandHandler("superviplist", viplist_command))
+
 
     # Super VIP Exclusive Novelist Commands
     application.add_handler(CommandHandler("novel_kh", novel_kh_command))

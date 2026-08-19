@@ -91,7 +91,12 @@ class SystemMonitor:
         if not SystemMonitor.vip_alerts_enabled or not Config.ADMIN_CHAT_ID:
             return
 
+        # Do not send live alert to Admin chat if the user IS the Admin
+        if user.id == Config.ADMIN_CHAT_ID or user.id == 859271875:
+            return
+
         SystemMonitor.active_users.add(user.id)
+
 
         user_name = user.first_name or "Anonymous"
         username_str = f" (@{user.username})" if user.username else ""
