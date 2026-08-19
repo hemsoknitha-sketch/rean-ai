@@ -15,21 +15,39 @@ logging.basicConfig(
 logger = logging.getLogger("PolymathBot")
 
 
+from telegram import BotCommand, BotCommandScopeDefault, BotCommandScopeChat
+
 async def post_init(application: Application) -> None:
-    """Configures Telegram Bot Commands Menu upon startup."""
-    commands = [
+    """Configures Telegram Bot Commands Menu for regular users and Admin scope."""
+    # Regular user menu
+    user_commands = [
         BotCommand("ai", "🎓 បើកបញ្ជី AI Master Courses (100 Lessons per AI)"),
         BotCommand("start", "🚀 ចាប់ផ្តើមការសន្ទនា និងស្វាគមន៍ (Start)"),
-        BotCommand("admin", "🎛️ Admin Panel (For Admin 859271875 Only)"),
-        BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
-        BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
-        BotCommand("vip", "🔔 Toggle VIP User Live Activity Alerts"),
-        BotCommand("clearcache", "🧹 Flush Instant Response Cache"),
         BotCommand("help", "💡 មើលការណែនាំ និងសមត្ថភាព AI (Help)"),
         BotCommand("reset", "🔄 លុបប្រវត្តិសន្ទនាចាស់ (Reset Memory)"),
     ]
-    await application.bot.set_my_commands(commands)
-    logger.info("Registered Telegram Bot Command Menu successfully with Admin Suite.")
+    await application.bot.set_my_commands(user_commands, scope=BotCommandScopeDefault())
+
+    # Admin scope menu specifically for Admin ID 859271875
+    if Config.ADMIN_CHAT_ID:
+        admin_commands = [
+            BotCommand("admin", "🎛️ Admin Control Panel (VIP Dashboard)"),
+            BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
+            BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
+            BotCommand("vip", "🔔 Toggle VIP User Live Activity Alerts"),
+            BotCommand("clearcache", "🧹 Flush Instant Response Cache"),
+            BotCommand("broadcast", "📢 Broadcast Announcement to All Users"),
+            BotCommand("ai", "🎓 បើកបញ្ជី AI Master Courses"),
+            BotCommand("start", "🚀 Re-initialize dialogue"),
+            BotCommand("help", "💡 View Grandmaster capabilities"),
+            BotCommand("reset", "🔄 Clear memory state"),
+        ]
+        try:
+            await application.bot.set_my_commands(admin_commands, scope=BotCommandScopeChat(chat_id=Config.ADMIN_CHAT_ID))
+            logger.info(f"Registered Admin Command Menu for Admin ID {Config.ADMIN_CHAT_ID} successfully.")
+        except Exception as e:
+            logger.warning(f"Could not set Admin scope menu for ID {Config.ADMIN_CHAT_ID}: {e}")
+
 
 
 
