@@ -122,8 +122,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     vip_info = VIPManager.get_vip_info(user.id)
     
     if is_user_vip:
+        tier_str = vip_info.get('tier', 'SUPER_VIP') if vip_info else "SUPER_VIP / Admin"
         remaining_days = vip_info.get("remaining_days", "Unlimited") if vip_info else "Lifetime"
-        vip_status_str = f"🟢 ACTIVE ({vip_info.get('tier', 'VIP')} - {remaining_days} days)"
+        vip_status_str = f"🟢 ACTIVE ({tier_str} - {remaining_days})"
     else:
         vip_status_str = "🔴 INACTIVE (Free User - Upgrade Required for Courses & Novel Engine)"
 
@@ -138,11 +139,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "<b>Commands:</b>\n"
         "/ai - 🎓 បើកបញ្ជី AI Courses ទាំងអស់ (100 Lessons per AI)\n"
         "/novel_kh - 📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)\n"
-        "/novel_18+ - 🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)\n"
+        "/novel_18 - 🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)\n"
         "/start - Re-initialize dialogue\n"
         "/reset - Clear conversation memory\n"
         "/help - View Grandmaster capabilities"
     )
+
 
 
     if is_admin(user.id):
