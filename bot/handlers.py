@@ -26,6 +26,8 @@ from core.novel_18_cache import Novel18Cache
 from core.master_prompt_cache import MasterPromptCache
 from core.security import AntiSpamGuard, PromptInjectionGuard
 from core.user_registry import UserRegistry
+from core.backup_engine import BackupEngine
+
 
 
 
@@ -473,6 +475,23 @@ async def delvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             await update.message.reply_text(f"⚠️ Telegram ID <code>{target_id}</code> was not found in VIP database.", parse_mode=ParseMode.HTML)
     except Exception as e:
         await update.message.reply_text(f"⚠️ Error: {e}", parse_mode=ParseMode.HTML)
+
+
+
+async def backup_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /backup command to trigger instant system database ZIP backup sent to Admin."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied: Only Super Admin ID 859271875 can execute this command.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    msg = await update.message.reply_text("📦 <b>កំពុងបង្កើត ZIP Backup នៃ Database ទាំងអស់...</b>", parse_mode=ParseMode.HTML)
+    success = await BackupEngine.send_backup_to_admin(context.bot)
+    if success:
+        await msg.edit_text("✅ <b>ឯកសារ Backup ZIP ត្រូវបានផ្ញើចូលទៅប្រអប់ Chat របស់ Admin រួចរាល់!</b>", parse_mode=ParseMode.HTML)
+    else:
+        await msg.edit_text("⚠️ កើតមានបញ្ហាក្នុងការផ្ញើ Backup File។", parse_mode=ParseMode.HTML)
+
 
 
 async def viplist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -1008,6 +1027,8 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("vip", vip_toggle_command))
     application.add_handler(CommandHandler("clearcache", clearcache_command))
     application.add_handler(CommandHandler("broadcast", broadcast_command))
+    application.add_handler(CommandHandler("backup", backup_command))
+
     
     # VIP & Super VIP License Management Commands
     application.add_handler(CommandHandler("addvip", addvip_command))

@@ -46,6 +46,7 @@ async def post_init(application: Application) -> None:
             BotCommand("delvip", "🗑️ Revoke VIP/Super VIP License"),
             BotCommand("viplist", "📋 List All Active VIP Subscriptions"),
             BotCommand("new_user_list", "📋 List Registered Free Users (Non-VIP Leads)"),
+            BotCommand("backup", "📦 Trigger Instant System Database Backup"),
             BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
 
             BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
@@ -66,6 +67,11 @@ async def post_init(application: Application) -> None:
             logger.info(f"Registered Admin Command Menu for Admin ID {Config.ADMIN_CHAT_ID} successfully.")
         except Exception as e:
             logger.warning(f"Could not set Admin scope menu for ID {Config.ADMIN_CHAT_ID}: {e}")
+
+    # Start Automated 2:00 AM Phnom Penh Backup Scheduler Daemon
+    import asyncio
+    from core.backup_engine import BackupEngine
+    asyncio.create_task(BackupEngine.schedule_daily_2am_backup(application.bot))
 
 
 
