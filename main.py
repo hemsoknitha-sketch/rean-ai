@@ -32,6 +32,9 @@ async def post_init(application: Application) -> None:
     if Config.ADMIN_CHAT_ID:
         admin_commands = [
             BotCommand("admin", "🎛️ Admin Control Panel (VIP Dashboard)"),
+            BotCommand("addvip", "🔑 Grant or Extend VIP License for User"),
+            BotCommand("delvip", "🗑️ Revoke VIP License from User"),
+            BotCommand("viplist", "📋 List All VIP Active Subscriptions"),
             BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
             BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
             BotCommand("vip", "🔔 Toggle VIP User Live Activity Alerts"),
@@ -42,6 +45,7 @@ async def post_init(application: Application) -> None:
             BotCommand("help", "💡 View Grandmaster capabilities"),
             BotCommand("reset", "🔄 Clear memory state"),
         ]
+
         try:
             await application.bot.set_my_commands(admin_commands, scope=BotCommandScopeChat(chat_id=Config.ADMIN_CHAT_ID))
             logger.info(f"Registered Admin Command Menu for Admin ID {Config.ADMIN_CHAT_ID} successfully.")

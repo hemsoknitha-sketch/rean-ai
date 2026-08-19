@@ -20,6 +20,7 @@ from core.reviewer import ReviewerAgent
 from core.curriculum import CurriculumEngine, AI_COURSES
 from core.admin import SystemMonitor
 from core.lesson_cache import LessonCache
+from core.vip_manager import VIPManager
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,35 @@ reviewer_agent = ReviewerAgent()
 def is_admin(user_id: int) -> bool:
     """Checks if the user ID matches Config.ADMIN_CHAT_ID or 859271875."""
     return user_id == Config.ADMIN_CHAT_ID or user_id == 859271875
+
+
+async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """Enforces VIP authorization. Returns True if authorized, False if blocked."""
+    user = update.effective_user
+    if not user:
+        return False
+
+    if VIPManager.is_vip(user.id):
+        return True
+
+    text = (
+        "🔒 <b>ACCESS RESTRICTED: VIP MEMBERSHIP REQUIRED</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "To access the Supreme Polymath AI Masterclasses and Cognitive AI Engine, please upgrade your account to VIP Membership.\n\n"
+        f"👤 <b>Name:</b> {user.first_name}\n"
+        f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n\n"
+        "📩 <b>To Purchase or Activate VIP License:</b>\n"
+        "Contact Super Admin on Telegram to get authorized access.\n"
+        "• Telegram Admin: <b>@soknitha</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━"
+    )
+
+    if update.callback_query:
+        await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
+    elif update.message:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+    return False
+
 
 
 async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
@@ -77,12 +107,18 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-
     """Handles /start command with a trilingual Polymath Grandmaster greeting."""
     user = update.effective_user
     chat_id = update.effective_chat.id
+
+    if not await check_vip_access(update, context):
+        return
+
     state_manager.reset_state(chat_id)
     SystemMonitor.active_users.add(chat_id)
+
+    vip_info = VIPManager.get_vip_info(user.id)
+    remaining_str = vip_info.get("remaining_days", "Unlimited") if vip_info else "Lifetime"
 
     greeting = (
         f"Greetings <b>{user.first_name}</b>.\n\n"
@@ -90,7 +126,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "master-level AI courses (100 lessons per AI topic) across computer science, mathematics, and philosophy.\n\n"
         "• ភាសាខ្មែរ: ខ្ញុំត្រៀមខ្លួនជាស្រេចក្នុងការបង្រៀន ១០០ មេរៀន ក្នុង ១ ជំនាញ AI លម្អិតឥតលាក់បាំង។\n"
         "• English: Ask any query or select an AI Course from the menu below to begin learning.\n\n"
-        f"🆔 <b>Your Telegram User ID:</b> <code>{user.id}</code>\n\n"
+        f"🆔 <b>Your Telegram User ID:</b> <code>{user.id}</code>\n"
+        f"👑 <b>VIP License Status:</b> 🟢 ACTIVE (Remaining: <b>{remaining_str}</b> days)\n\n"
         "<b>Commands:</b>\n"
         "/ai - 🎓 បើកបញ្ជី AI Courses ទាំងអស់ (100 Lessons per AI)\n"
         "/start - Re-initialize dialogue\n"
@@ -109,9 +146,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await update.message.reply_text(greeting, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
 
-
 async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles /ai or /courses command to display interactive AI learning menu."""
+    if not await check_vip_access(update, context):
+        return
+
     text = (
         "<b>🎓 បញ្ជី AI Master Courses (១០០ មេរៀន / 100 Lessons in 1 AI Topic)</b>\n\n"
         "សូមជ្រើសរើសជំនាញ AI ដែលលោកអ្នកចង់រៀនសូត្រពីកម្រិតដំបូង រហូតដល់កម្រិត Grandmaster ៖"
@@ -125,6 +164,7 @@ async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
     else:
         await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
 
 
 async def admin_panel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -282,6 +322,92 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     await update.message.reply_text(f"✅ Broadcast sent successfully to {count} active users.", parse_mode=ParseMode.HTML)
 
 
+async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /addvip <user_id> [days] [name] to grant or extend VIP access."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    if not context.args:
+        text = (
+            "👑 <b>GRANT VIP LICENSE TOOL</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "To grant or extend VIP access to a user, type:\n\n"
+            "<code>/addvip <user_id> [days] [name]</code>\n\n"
+            "<i>Examples:</i>\n"
+            "• <code>/addvip 123456789 30</code> (Grants 30 days VIP access)\n"
+            "• <code>/addvip 123456789 365 VIP Student</code> (Grants 1 year VIP access)\n"
+            "• <code>/addvip 123456789 0 Lifetime Admin</code> (Grants Lifetime access)\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    try:
+        target_id = int(context.args[0])
+        days = int(context.args[1]) if len(context.args) > 1 else 30
+        name = " ".join(context.args[2:]) if len(context.args) > 2 else "VIP User"
+        is_lifetime = (days <= 0)
+
+        expiry_display = VIPManager.add_vip(target_id, name=name, days=days, is_lifetime=is_lifetime)
+        await update.message.reply_text(
+            f"✅ <b>VIP License Granted Successfully!</b>\n\n"
+            f"👤 <b>User:</b> {name}\n"
+            f"🆔 <b>Telegram ID:</b> <code>{target_id}</code>\n"
+            f"⏳ <b>Days Granted:</b> {'LIFETIME' if is_lifetime else f'{days} days'}\n"
+            f"📅 <b>Expires On:</b> <code>{expiry_display}</code>",
+            parse_mode=ParseMode.HTML
+        )
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ <b>Error:</b> Invalid parameters ({e}).", parse_mode=ParseMode.HTML)
+
+
+async def delvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /delvip <user_id> to revoke VIP access."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    if not context.args:
+        await update.message.reply_text("⚠️ <b>Usage:</b> <code>/delvip <user_id></code>", parse_mode=ParseMode.HTML)
+        return
+
+    try:
+        target_id = int(context.args[0])
+        revoked = VIPManager.revoke_vip(target_id)
+        if revoked:
+            await update.message.reply_text(f"🗑️ <b>VIP License Revoked</b> for Telegram ID <code>{target_id}</code>.", parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(f"⚠️ Telegram ID <code>{target_id}</code> was not found in VIP database.", parse_mode=ParseMode.HTML)
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ Error: {e}", parse_mode=ParseMode.HTML)
+
+
+async def viplist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /viplist to list all active VIP subscriptions."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    vips = VIPManager.list_all_vips()
+    if not vips:
+        await update.message.reply_text("📋 <b>VIP LICENSED USERS DATABASE</b>\n\n<i>No VIP users currently registered.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    lines = []
+    for v in vips:
+        status_emoji = "🟢" if v.get('status', '').startswith("ACTIVE") else "🔴"
+        lines.append(
+            f"{status_emoji} <b>{v.get('name', 'VIP User')}</b> (<code>{v['user_id']}</code>)\n"
+            f"   • Status: <b>{v.get('status')}</b> | Days Left: <b>{v.get('remaining_days')}</b> | Expiry: <code>{v.get('expiry_date')}</code>"
+        )
+
+    text = "📋 <b>VIP LICENSED USERS DATABASE</b>\n━━━━━━━━━━━━━━━━━━━━━\n" + "\n\n".join(lines) + "\n━━━━━━━━━━━━━━━━━━━━━"
+    await send_long_message(update.message, text)
+
 
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles interactive button taps for course selection, admin controls, and lesson execution."""
@@ -291,6 +417,11 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
     parts = data.split(":")
     action = parts[0]
+
+    if action != "admin":
+        if not await check_vip_access(update, context):
+            return
+
 
     if action == "admin":
         sub = parts[1]
@@ -430,6 +561,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not update.message or not update.message.text:
         return
 
+    if not await check_vip_access(update, context):
+        return
+
     chat_id = update.effective_chat.id
     user_query = update.message.text.strip()
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
@@ -469,6 +603,12 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("vip", vip_toggle_command))
     application.add_handler(CommandHandler("clearcache", clearcache_command))
     application.add_handler(CommandHandler("broadcast", broadcast_command))
+    
+    # VIP License Management Commands
+    application.add_handler(CommandHandler("addvip", addvip_command))
+    application.add_handler(CommandHandler("delvip", delvip_command))
+    application.add_handler(CommandHandler("viplist", viplist_command))
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
