@@ -291,7 +291,7 @@ class ArchitectAgent:
         config = types.GenerateContentConfig(
             system_instruction=KHMER_NOVELIST_SYSTEM_PROMPT,
             temperature=0.85,
-            max_output_tokens=3072,
+            max_output_tokens=8192,
         )
 
         candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
@@ -336,8 +336,9 @@ class ArchitectAgent:
         config = types.GenerateContentConfig(
             system_instruction=QUEEN_OF_ROMANCE_18_SYSTEM_PROMPT,
             temperature=0.88,
-            max_output_tokens=3072,
+            max_output_tokens=8192,
         )
+
 
         candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
         last_exception = None

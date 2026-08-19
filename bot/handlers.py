@@ -604,11 +604,16 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     try:
         novel_prompt = (
-            f"Generate a substantial novel chapter in Khmer based on these details:\n"
+            f"Write an exceptionally substantial, deeply detailed, extremely long, immersive novel chapter in Khmer based on these prompt details:\n"
             f"{prompt_details}\n\n"
-            f"Follow all 4 sections of the APEX Khmer Novelist Grandmaster mandate strictly."
+            f"REQUIREMENTS FOR EXTENSIVE LENGTH & DEEP DETAIL:\n"
+            f"1. Do NOT summarize or rush the plot. Write extensive prose detailing setting (Kal Akas), internal thoughts, dialogue, sensory feelings, and character actions.\n"
+            f"2. Follow all 4 sections of the APEX Khmer Novelist Grandmaster mandate strictly.\n"
+            f"3. Output a complete, massive, long chapter (at least 1500 - 3000 words in Khmer).\n"
+            f"4. Maintain zero markdown symbols (no asterisks, no rules, no bolding tags)."
         )
         raw_novel = await architect_agent.generate_novel_chapter(novel_prompt)
+
         sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
 
         if sanitized and len(sanitized.strip()) > 20:
@@ -692,11 +697,16 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     try:
         novel_prompt = (
-            f"Generate a full romance novel chapter based on these details:\n"
+            f"Write an exceptionally substantial, deeply detailed, extremely long, immersive romance novel chapter in Khmer based on these prompt details:\n"
             f"{prompt_details}\n\n"
-            f"Strictly apply the Queen of Romance persona, Heat Level requested, Layering Framework (Skin, Blood, Muscle, Mind), and zero raw markdown symbols."
+            f"REQUIREMENTS FOR EXTENSIVE LENGTH & DEEP DETAIL:\n"
+            f"1. Do NOT summarize or rush the plot. Write extensive prose detailing setting, internal thoughts, dialogue, sensory feelings, and character actions.\n"
+            f"2. Apply all 4 layers of the framework (Skin, Blood, Muscle, Mind) in full depth with maximum emotional & physical description.\n"
+            f"3. Output a complete, massive, long chapter (at least 1500 - 3000 words in Khmer).\n"
+            f"4. Maintain zero markdown symbols (no asterisks, no rules, no bolding tags)."
         )
         raw_novel = await architect_agent.generate_novel_18_chapter(novel_prompt)
+
         sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
 
         if sanitized and len(sanitized.strip()) > 20:
