@@ -23,6 +23,8 @@ from core.lesson_cache import LessonCache
 from core.vip_manager import VIPManager
 from core.novel_cache import NovelCache
 from core.novel_18_cache import Novel18Cache
+from core.security import AntiSpamGuard, PromptInjectionGuard
+
 
 logger = logging.getLogger(__name__)
 
@@ -799,7 +801,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not update.message or not update.message.text:
         return
 
+    user = update.effective_user
+    if user:
+        is_spam, cooldown = AntiSpamGuard.is_spamming(user.id)
+        if is_spam:
+            await update.message.reply_text(
+                f"⚠️ <b>ប្រព័ន្ធសុវត្ថិភាព ANTI-SPAM GUARD ACTIVE ៖</b>\n"
+                f"លោកអ្នកបានផ្ញើសារញឹកញាប់ពេក (Flood Protection)។ សូមរង់ចាំ <b>{cooldown} វិនាទី</b> ទៀត មុននឹងផ្ញើសារបន្ទាប់។",
+                parse_mode=ParseMode.HTML
+            )
+            return
+
     user_query = update.message.text.strip()
+    user_query = PromptInjectionGuard.sanitize_query(user_query)
 
     # Route /novel_18+ or /Novel_18+ text commands gracefully
     if user_query.startswith("/novel_18+") or user_query.startswith("/Novel_18+"):
@@ -811,9 +825,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     chat_id = update.effective_chat.id
-
-    user_query = update.message.text.strip()
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
 
     user_state = state_manager.get_state(chat_id)
     intent = evaluator_agent.analyze(user_query)
