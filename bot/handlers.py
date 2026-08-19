@@ -130,26 +130,30 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         vip_status_str = "🔴 INACTIVE (Free User - Upgrade Required for Courses & Novel Engine)"
 
     greeting = (
-        f"Greetings <b>{user.first_name}</b>.\n\n"
-        "I am the Supreme Polymath AI Grandmaster, an elite cognitive intelligence designed to deliver "
-        "master-level AI courses (100 lessons per AI topic) across computer science, mathematics, and philosophy.\n\n"
-        "• ភាសាខ្មែរ: ខ្ញុំត្រៀមខ្លួនជាស្រេចក្នុងការបង្រៀន ១០០ មេរៀន ក្នុង ១ ជំនាញ AI លម្អិតឥតលាក់បាំង។\n"
-        "• English: Ask any query or select an AI Course from the menu below to begin learning.\n\n"
-        f"🆔 <b>Your Telegram User ID:</b> <code>{user.id}</code>\n"
-        f"👑 <b>VIP License Status:</b> {vip_status_str}\n\n"
-        "<b>Commands:</b>\n"
-        "/ai - 🎓 បើកបញ្ជី AI Courses ទាំងអស់ (100 Lessons per AI)\n"
-        "/novel_kh - 📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)\n"
-        "/novel_18 - 🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)\n"
-        "/start - Re-initialize dialogue\n"
-        "/reset - Clear conversation memory\n"
-        "/help - View Grandmaster capabilities"
+        f"✨ <b>ស្វាគមន៍មកកាន់ SUPREME POLYMATH AI GRANDMASTER!</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        f"👋 ជម្រាបសួរ <b>{user.first_name}</b>!\n"
+        "ខ្ញុំគឺជាបណ្តាញខួរក្បាលសិប្បនិម្មិត <b>Polymath AI Grandmaster</b> ដែលមានសមត្ថភាពខ្ពស់បំផុតក្នុងការបង្រៀន AI Masterclasses ទាំង ៧០០ មេរៀន និងនិពន្ធប្រលោមលោកខ្មែរគ្រប់កម្រិត!\n\n"
+        f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
+        f"👑 <b>ស្ថានភាពអាជ្ញាប័ណ្ណ ៖</b> {vip_status_str}\n\n"
+        "🌟 <b>កញ្ចប់សេវាកម្មអាជ្ញាប័ណ្ណ (MEMBERSHIP TIERS) ៖</b>\n\n"
+        "១. <b>👑 VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ VIP) ៖</b>\n"
+        "• ចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន (១០០ មេរៀនក្នុង ១ ប្រធានបទ AI)\n"
+        "• សួរសំណួរទូទៅ និងដោះស្រាយលំហាត់ល្បឿនលឿន <b>< 1 វិនាទី ($0 API Limit)</b>\n\n"
+        "២. <b>🌟 SUPER VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ Super VIP) ៖</b>\n"
+        "• ទទួលបានអត្ថប្រយោជន៍ VIP ទាំងអស់ ១០០%\n"
+        "• 📖 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីននិពន្ធប្រលោមលោកខ្មែរ <b>/novel_kh</b> (APEX Khmer Novelist Engine)\n"
+        "• 🔞 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីននិពន្ធប្រលោមលោកមនោសញ្ចេតនា <b>/novel_18</b> (Queen of Romance 18+ Engine)\n"
+        "• ទទួលបានសិទ្ធិអាទិភាពខ្ពស់បំផុត (Priority Processing) គ្មានថ្ងៃទើរ Quota ឡើយ!\n\n"
+        "📩 <b>ទាក់ទងជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ ៖</b>\n"
+        f"សូមផ្ញើលេខ Telegram ID <code>{user.id}</code> ទៅកាន់ Admin ៖\n"
+        "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━"
     )
 
-
-
     if is_admin(user.id):
-        greeting += "\n\n👑 <b>Super Admin Panel Access Authorized:</b> Use /admin to open VIP Dashboard."
+        greeting += "\n\n👑 <b>Super Admin Dashboard Authorized:</b> បញ្ជា /admin សម្រាប់គ្រប់គ្រងប្រព័ន្ធ។"
+
 
     keyboard = []
     for key, info in AI_COURSES.items():
