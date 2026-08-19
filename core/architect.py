@@ -9,8 +9,10 @@ from config import Config
 from memory.state_manager import UserState
 from core.evaluator import IntentAnalysis
 from core.local_llm import LocalLLMClient
+from core.query_cache import QueryCache
 
 logger = logging.getLogger(__name__)
+
 
 APEX_GRANDMASTER_SYSTEM_PROMPT = """You are the Supreme APEX Polymath AI Grandmaster, an elite cognitive intelligence operating with absolute pedagogical precision, deep Socratic wisdom, and zero gatekeeping.
 
@@ -70,9 +72,9 @@ class ArchitectAgent:
         intent: IntentAnalysis,
     ) -> str:
         """Asynchronously generates response using Response Cache, Local LLM, or Gemini API."""
-        # 1. Check In-Memory Cache (Only for single turn queries without heavy history)
+        # 1. Check Persistent General Query Cache (0.001s Instant Response + $0 API Cost)
         if not user_state.history:
-            cached_resp = self.cache.get(user_query, intent.language_hint)
+            cached_resp = QueryCache.get(user_query, intent.language_hint)
             if cached_resp:
                 return cached_resp
 
@@ -104,6 +106,7 @@ class ArchitectAgent:
             if local_resp:
                 if not user_state.history:
                     self.cache.set(user_query, intent.language_hint, local_resp)
+                    QueryCache.set(user_query, intent.language_hint, local_resp)
                 return local_resp
             logger.warning("Local LLM unavailable. Falling back to Gemini API...")
 
@@ -129,7 +132,9 @@ class ArchitectAgent:
             )
             if response and not user_state.history:
                 self.cache.set(user_query, intent.language_hint, response)
+                QueryCache.set(user_query, intent.language_hint, response)
             return response
+
         except Exception as e:
             error_str = str(e)
             logger.error(f"Gemini API execution error: {e}", exc_info=True)
