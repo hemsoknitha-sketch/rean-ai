@@ -87,7 +87,7 @@ class SystemMonitor:
 
     @staticmethod
     async def notify_admin_live_activity(bot, user, query: str, response: str) -> None:
-        """Sends real-time VIP User Alert to Admin Telegram ID."""
+        """Sends real-time VIP User Alert with 100% FULL Query & Response to Admin Telegram ID."""
         if not SystemMonitor.vip_alerts_enabled or not Config.ADMIN_CHAT_ID:
             return
 
@@ -95,33 +95,33 @@ class SystemMonitor:
 
         user_name = user.first_name or "Anonymous"
         username_str = f" (@{user.username})" if user.username else ""
-        
-        # Clean response preview
-        clean_resp = response.replace("<", "&lt;").replace(">", "&gt;")
-        if len(clean_resp) > 300:
-            clean_resp = clean_resp[:300] + "..."
-
-        clean_query = query.replace("<", "&lt;").replace(">", "&gt;")
-        if len(clean_query) > 200:
-            clean_query = clean_query[:200] + "..."
-
         engine_name = "🤖 Local Trained Model" if Config.USE_LOCAL_MODEL else "⚡ Gemini 3.6 Flash"
 
-        alert_msg = (
+        header = (
             f"🔔 <b>VIP USER LIVE ACTIVITY ALERT</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
             f"👤 <b>User:</b> {user_name}{username_str} [ID: <code>{user.id}</code>]\n"
             f"⚙️ <b>Engine:</b> {engine_name}\n\n"
-            f"💬 <b>User Query:</b>\n<i>{clean_query}</i>\n\n"
-            f"🤖 <b>AI Response Preview:</b>\n{clean_resp}\n"
-            f"━━━━━━━━━━━━━━━━━━━━━"
+            f"💬 <b>User Query:</b>\n<i>{query}</i>\n\n"
+            f"🤖 <b>AI Full Response:</b>\n"
         )
 
+        full_text = header + response + "\n━━━━━━━━━━━━━━━━━━━━━"
+
         try:
-            await bot.send_message(
-                chat_id=Config.ADMIN_CHAT_ID,
-                text=alert_msg,
-                parse_mode="HTML"
-            )
+            # Import send_long_message safely to handle 4000+ char responses
+            from bot.handlers import send_long_message
+
+            class DummyAdminTarget:
+                def __init__(self, bot, chat_id):
+                    self.bot = bot
+                    self.chat_id = chat_id
+
+                async def reply_text(self, text, parse_mode=None, reply_markup=None):
+                    await self.bot.send_message(chat_id=self.chat_id, text=text, parse_mode=parse_mode, reply_markup=reply_markup)
+
+            target = DummyAdminTarget(bot, Config.ADMIN_CHAT_ID)
+            await send_long_message(target, full_text)
         except Exception as e:
-            logger.warning(f"Failed to send VIP Alert to Admin ID {Config.ADMIN_CHAT_ID}: {e}")
+            logger.warning(f"Failed to send full VIP Alert to Admin ID {Config.ADMIN_CHAT_ID}: {e}")
+
