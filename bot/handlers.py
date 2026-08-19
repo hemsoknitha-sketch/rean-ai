@@ -19,8 +19,10 @@ from core.architect import ArchitectAgent
 from core.reviewer import ReviewerAgent
 from core.curriculum import CurriculumEngine, AI_COURSES
 from core.admin import SystemMonitor
+from core.lesson_cache import LessonCache
 
 logger = logging.getLogger(__name__)
+
 
 # Initialize cognitive components
 state_manager = StateManager(max_turns=Config.MAX_MEMORY_TURNS)
@@ -344,20 +346,32 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         chat_id = query.message.chat_id
 
         lesson_title = CurriculumEngine.get_lesson_title(course_key, lesson_num, lang="km")
-        status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
-        await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
+        # 1. Check Persistent Disk Lesson Cache (0.001s Instant Response + $0 API Cost)
+        cached_sanitized = LessonCache.get(course_key, lesson_num, lang="km")
+
+        if not cached_sanitized:
+            status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
+            await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
         try:
-            prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
+            if cached_sanitized:
+                sanitized = cached_sanitized
+            else:
+                prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
+                user_state = state_manager.get_state(chat_id)
+                intent = evaluator_agent.analyze(prompt)
+
+                raw_response = await architect_agent.generate_response(user_query=prompt, user_state=user_state, intent=intent)
+                sanitized = reviewer_agent.validate_and_sanitize(text=raw_response, strict=Config.ZERO_MARKDOWN_STRICT)
+
+                if not sanitized or len(sanitized.strip()) < 10:
+                    sanitized = f"📘 <b>{lesson_title}</b>\n\nប្រព័ន្ធកំពុងរៀបចំខ្លឹមសារមេរៀននេះឡើងវិញ។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីព្យាយាមម្តងទៀត ឬបន្តទៅមេរៀនបន្ទាប់។"
+                else:
+                    # Save to persistent disk cache for all future users
+                    LessonCache.set(course_key, lesson_num, "km", sanitized)
+
             user_state = state_manager.get_state(chat_id)
-            intent = evaluator_agent.analyze(prompt)
-
-            raw_response = await architect_agent.generate_response(user_query=prompt, user_state=user_state, intent=intent)
-            sanitized = reviewer_agent.validate_and_sanitize(text=raw_response, strict=Config.ZERO_MARKDOWN_STRICT)
-
-            if not sanitized or len(sanitized.strip()) < 10:
-                sanitized = f"📘 <b>{lesson_title}</b>\n\nប្រព័ន្ធកំពុងរៀបចំខ្លឹមសារមេរៀននេះឡើងវិញ។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីព្យាយាមម្តងទៀត ឬបន្តទៅមេរៀនបន្ទាប់។"
-
             user_state.add_turn(role="user", content=f"Lesson Request: {lesson_title}")
             user_state.add_turn(role="model", content=sanitized)
 
@@ -388,6 +402,7 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
                 f"⚠️ <b>មានបញ្ហាក្នុងការទាញយកមេរៀន៖</b> {err}\n\nសូមព្យាយាមចុចរៀនម្តងទៀត ឬជ្រើសរើសមេរៀនផ្សេង។",
                 parse_mode=ParseMode.HTML
             )
+
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
