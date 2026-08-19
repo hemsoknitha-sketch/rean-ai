@@ -785,10 +785,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not update.message or not update.message.text:
         return
 
+    user_query = update.message.text.strip()
+
+    # Route /novel_18+ or /Novel_18+ text commands gracefully
+    if user_query.startswith("/novel_18+") or user_query.startswith("/Novel_18+"):
+        context.args = user_query.split()[1:]
+        await novel_18_command(update, context)
+        return
+
     if not await check_vip_access(update, context):
         return
 
     chat_id = update.effective_chat.id
+
     user_query = update.message.text.strip()
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
@@ -839,10 +848,11 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("novel_18", novel_18_command))
     application.add_handler(CommandHandler("Novel_18", novel_18_command))
-    application.add_handler(CommandHandler("novel_18+", novel_18_command))
-    application.add_handler(CommandHandler("Novel_18+", novel_18_command))
+    application.add_handler(CommandHandler("novel18", novel_18_command))
+    application.add_handler(CommandHandler("Novel18", novel_18_command))
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
+
 
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
