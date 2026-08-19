@@ -115,14 +115,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user = update.effective_user
     chat_id = update.effective_chat.id
 
-    if not await check_vip_access(update, context):
-        return
-
     state_manager.reset_state(chat_id)
     SystemMonitor.active_users.add(chat_id)
 
+    is_user_vip = VIPManager.is_vip(user.id)
     vip_info = VIPManager.get_vip_info(user.id)
-    remaining_str = vip_info.get("remaining_days", "Unlimited") if vip_info else "Lifetime"
+    
+    if is_user_vip:
+        remaining_days = vip_info.get("remaining_days", "Unlimited") if vip_info else "Lifetime"
+        vip_status_str = f"🟢 ACTIVE ({vip_info.get('tier', 'VIP')} - {remaining_days} days)"
+    else:
+        vip_status_str = "🔴 INACTIVE (Free User - Upgrade Required for Courses & Novel Engine)"
 
     greeting = (
         f"Greetings <b>{user.first_name}</b>.\n\n"
@@ -131,13 +134,16 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "• ភាសាខ្មែរ: ខ្ញុំត្រៀមខ្លួនជាស្រេចក្នុងការបង្រៀន ១០០ មេរៀន ក្នុង ១ ជំនាញ AI លម្អិតឥតលាក់បាំង។\n"
         "• English: Ask any query or select an AI Course from the menu below to begin learning.\n\n"
         f"🆔 <b>Your Telegram User ID:</b> <code>{user.id}</code>\n"
-        f"👑 <b>VIP License Status:</b> 🟢 ACTIVE (Remaining: <b>{remaining_str}</b> days)\n\n"
+        f"👑 <b>VIP License Status:</b> {vip_status_str}\n\n"
         "<b>Commands:</b>\n"
         "/ai - 🎓 បើកបញ្ជី AI Courses ទាំងអស់ (100 Lessons per AI)\n"
+        "/novel_kh - 📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)\n"
+        "/novel_18+ - 🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)\n"
         "/start - Re-initialize dialogue\n"
         "/reset - Clear conversation memory\n"
         "/help - View Grandmaster capabilities"
     )
+
 
     if is_admin(user.id):
         greeting += "\n\n👑 <b>Super Admin Panel Access Authorized:</b> Use /admin to open VIP Dashboard."
