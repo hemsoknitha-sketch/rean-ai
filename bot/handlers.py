@@ -351,7 +351,7 @@ async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "👑 <b>GRANT VIP LICENSE TOOL</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "To grant or extend VIP access to a user, type:\n\n"
-            "<code>/addvip <user_id> [days] [name]</code>\n\n"
+            "<code>/addvip [user_id] [days] [name]</code>\n\n"
             "<i>Examples:</i>\n"
             "• <code>/addvip 123456789 30</code> (Grants 30 days VIP access)\n"
             "• <code>/addvip 123456789 365 VIP Student</code> (Grants 1 year VIP access)\n"
@@ -381,7 +381,7 @@ async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 
 async def addsupervip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles /addsupervip <user_id> [days] [name] to grant Super VIP tier."""
+    """Handles /addsupervip [user_id] [days] [name] to grant Super VIP tier."""
     user = update.effective_user
     if not is_admin(user.id):
         await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
@@ -392,7 +392,7 @@ async def addsupervip_command(update: Update, context: ContextTypes.DEFAULT_TYPE
             "🌟 <b>GRANT SUPER VIP LICENSE TOOL</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
             "To grant or extend SUPER VIP tier to a user, type:\n\n"
-            "<code>/addsupervip <user_id> [days] [name]</code>\n\n"
+            "<code>/addsupervip [user_id] [days] [name]</code>\n\n"
             "<i>Examples:</i>\n"
             "• <code>/addsupervip 123456789 30</code> (Grants 30 days Super VIP)\n"
             "• <code>/addsupervip 123456789 365 Super VIP Pro</code> (Grants 1 year Super VIP)\n"
@@ -424,15 +424,16 @@ async def addsupervip_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def delvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles /delvip <user_id> to revoke VIP access."""
+    """Handles /delvip [user_id] to revoke VIP access."""
     user = update.effective_user
     if not is_admin(user.id):
         await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
         return
 
     if not context.args:
-        await update.message.reply_text("⚠️ <b>Usage:</b> <code>/delvip <user_id></code>", parse_mode=ParseMode.HTML)
+        await update.message.reply_text("⚠️ <b>Usage:</b> <code>/delvip [user_id]</code>", parse_mode=ParseMode.HTML)
         return
+
 
     try:
         target_id = int(context.args[0])
