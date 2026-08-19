@@ -36,8 +36,34 @@ AI_COURSES: Dict[str, Dict[str, str]] = {
         "title": "Prompt Engineering & Model Fine-Tuning",
         "emoji": "⚡",
         "desc": "រៀនសូត្រពី Few-Shot Prompting, QLoRA, Unsloth Fine-Tuning, និង Alignment"
+    },
+    "rag": {
+        "title": "RAG & Vector Databases",
+        "emoji": "🎯",
+        "desc": "រៀនសូត្រពី Vector Search (Pinecone, Qdrant, ChromaDB), Hybrid Search, និង Document Chat Intelligence"
+    },
+    "aivideo": {
+        "title": "AI Video & Voice Generation",
+        "emoji": "🎬",
+        "desc": "រៀនសូត្រពី Sora, Runway Gen-3, Kling AI, Luma Dream, និង Voice Cloning ជាមួយ ElevenLabs"
+    },
+    "automation": {
+        "title": "AI Automation & No-Code Workflows",
+        "emoji": "⚙️",
+        "desc": "រៀនសូត្រពី n8n, Make.com, Flowise AI, និងការតភ្ជាប់ AI ស្វ័យប្រវត្តិជាមួយ Telegram/Gmail/Sheets"
+    },
+    "reasoning": {
+        "title": "Reasoning Models & Deep Research",
+        "emoji": "🧬",
+        "desc": "រៀនសូត្រពី Chain-of-Thought (CoT), Test-Time Compute, DeepSeek-R1, និង OpenAI o1/o3-mini"
+    },
+    "security": {
+        "title": "AI Security, Safety & Red Teaming",
+        "emoji": "🛡️",
+        "desc": "រៀនសូត្រពី Prompt Injection Attacks, Jailbreak Defenses, OWASP for LLMs, និង System Guardrails"
     }
 }
+
 
 
 class CurriculumEngine:
