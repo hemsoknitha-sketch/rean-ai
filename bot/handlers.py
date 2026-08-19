@@ -452,7 +452,78 @@ async def viplist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await send_long_message(update.message, text)
 
 
+async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /novel_kh command. Restricted exclusively to Super VIP members."""
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    # Super VIP Gatekeeping Check
+    if not VIPManager.is_super_vip(user.id):
+        text = (
+            "🌟 <b>ACCESS RESTRICTED: SUPER VIP MEMBERSHIP REQUIRED</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "The <b>/novel_kh</b> feature (APEX Khmer Novelist Grandmaster Engine) is exclusively available for <b>SUPER VIP Members</b>.\n\n"
+            f"👤 <b>Name:</b> {user.first_name}\n"
+            f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n"
+            "👑 <b>Your Current Tier:</b> VIP User\n\n"
+            "📩 <b>To Upgrade to SUPER VIP Membership:</b>\n"
+            "Contact Super Admin on Telegram to unlock the Khmer Novelist Engine.\n"
+            "• Telegram Admin: <b>@soknitha</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        if update.callback_query:
+            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    # Super VIP User Executing /novel_kh
+    if not context.args:
+        text = (
+            "📖 <b>APEX KHMER NOVELIST GRANDMASTER ENGINE</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "✨ Welcome Super VIP Master! To write a deeply emotional Khmer novel chapter, type:\n\n"
+            "<code>/novel_kh [បរិបទ/កាលអាកាស] [តួអង្គ] [គោលដៅ/ទំនាស់] [ជំពូក]</code>\n\n"
+            "<i>ឧទាហរណ៍ ៖</i>\n"
+            "<code>/novel_kh ក្រុងលង្វែក សម័យបុរាណ, តួអង្គ៖ ជ័យ និង បុប្ផា, គោលដៅ៖ ស្នេហានិងការការពារទឹកដី, ជំពូកទី ១</code>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    prompt_details = " ".join(context.args)
+    status_msg = await update.message.reply_text("✍️ <b>កំពុងនិពន្ធប្រលោមលោកខ្មែរតាមទម្រង់ APEX Khmer Novelist Grandmaster...</b>", parse_mode=ParseMode.HTML)
+    await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
+    try:
+        novel_prompt = (
+            f"Generate a substantial novel chapter in Khmer based on these details:\n"
+            f"{prompt_details}\n\n"
+            f"Follow all 4 sections of the APEX Khmer Novelist Grandmaster mandate strictly."
+        )
+        raw_novel = await architect_agent.generate_novel_chapter(novel_prompt)
+        sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
+
+        # Notify Admin
+        try:
+            await SystemMonitor.notify_admin_live_activity(
+                bot=context.bot,
+                user=user,
+                query=f"/novel_kh {prompt_details}",
+                response=sanitized
+            )
+        except Exception:
+            pass
+
+        await send_long_message(update.message, sanitized)
+
+    except Exception as err:
+        logger.error(f"Khmer Novelist generation failed: {err}")
+        await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក៖ {err}", parse_mode=ParseMode.HTML)
+
+
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
     """Handles interactive button taps for course selection, admin controls, and lesson execution."""
     query = update.callback_query
     await query.answer()
@@ -653,7 +724,12 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("delvip", delvip_command))
     application.add_handler(CommandHandler("viplist", viplist_command))
 
+    # Super VIP Exclusive Novelist Command
+    application.add_handler(CommandHandler("novel_kh", novel_kh_command))
+    application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
+
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
 
 

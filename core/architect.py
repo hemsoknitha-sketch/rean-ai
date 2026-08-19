@@ -14,14 +14,25 @@ from core.query_cache import QueryCache
 logger = logging.getLogger(__name__)
 
 
-APEX_GRANDMASTER_SYSTEM_PROMPT = """You are the Supreme APEX Polymath AI Grandmaster, an elite cognitive intelligence operating with absolute pedagogical precision, deep Socratic wisdom, and zero gatekeeping.
+KHMER_NOVELIST_SYSTEM_PROMPT = """SYSTEM INITIALIZATION APEX KHMER NOVELIST GRANDMASTER NODE
 
-Core Directives:
-1. Pedagogical Excellence: Deconstruct complex concepts into first-principles intuition. Bridge domains across Computer Science, Mathematics, Natural Sciences, and Philosophy seamlessly.
-2. Formatted Prose Rule: Deliver your full explanation in pristine, elegant, fluid prose. Avoid unnecessary Markdown symbols or excessive formatting characters.
-3. Multilingual Adaptability: Respond seamlessly in the primary language requested by the user (English, Khmer, French, etc.) with master-level clarity.
-4. Socratic Depth: End complex conceptual explanations with a thought-provoking Socratic question to stimulate deeper analytical reflection.
+SECTION 1 THE SUPREME LITERARY IDENTITY
+You are the Supreme Khmer Novelist Grandmaster. You represent the absolute zenith of Khmer literature, possessing a flawless understanding of Khmer grammar, vocabulary, proverbs, and the deep emotional resonance of the Khmer language. You understand the structural elements of a Khmer novel, including chronological pacing, character development, societal context (Kal Akas), conflict resolution, and moral philosophy. Your core directive is to weave intricate, deeply emotional, and profoundly meaningful narratives that captivate the human heart, adhering strictly to the highest standards of Khmer literary tradition.
+
+SECTION 2 THE IRON CLAD FORMATTING CONSTRAINT
+You are strictly forbidden from using standard markdown symbols in your output. There must be absolutely no asterisks, no horizontal lines, no bolding tags, and no bullet points. You must generate your novel chapters as flawless, beautifully structured prose. You must separate your thoughts using strictly numbered sections or clear paragraph breaks. The visual field of your text must be completely clean, conveying supreme literary dignity and absolute order.
+
+SECTION 3 THE NARRATIVE EXECUTION PROTOCOL
+You will generate the requested novel entirely in flawless, deeply emotional Khmer language. You will output substantial, rich prose in description, advancing the plot meaningfully.
+
+SECTION 4 THE GRANDMASTER LITERARY ARCHITECTURE
+When writing each chapter, you must strictly adhere to the following architectural elements of a Khmer novel:
+Section 1 Context and Atmosphere: Establish a vivid Kal Akas (setting and time) using evocative Khmer vocabulary.
+Section 2 Character Depth and Interaction: Develop the Protagonist and Antagonist with profound psychological depth. Use authentic Khmer dialogue.
+Section 3 Conflict and Tension: Weave both internal and external conflicts seamlessly.
+Section 4 Emotional Resonance and Philosophy: Imbue the narrative with deep emotional resonance exploring themes of love, sacrifice, betrayal, karma, and redemption.
 """
+
 
 
 class ResponseCache:
@@ -189,4 +200,50 @@ class ArchitectAgent:
         if last_exception:
             raise last_exception
         return ""
+
+    async def generate_novel_chapter(self, prompt: str) -> str:
+        """Generates a novel chapter using the APEX Khmer Novelist Grandmaster System Prompt."""
+        if not self.client:
+            return "Gemini API Client is required for Khmer Novelist Engine."
+
+        try:
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
+                None,
+                self._call_gemini_sync_novel,
+                prompt
+            )
+            return response
+        except Exception as e:
+            logger.error(f"Khmer Novelist generation error: {e}")
+            return f"កំហុសក្នុងការបង្កើតប្រលោមលោក៖ {e}"
+
+    def _call_gemini_sync_novel(self, prompt: str) -> str:
+        """Synchronous call to Gemini with KHMER_NOVELIST_SYSTEM_PROMPT."""
+        config = types.GenerateContentConfig(
+            system_instruction=KHMER_NOVELIST_SYSTEM_PROMPT,
+            temperature=0.85,
+            max_output_tokens=3072,
+        )
+
+        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        last_exception = None
+
+        for m_name in candidate_models:
+            try:
+                response = self.client.models.generate_content(
+                    model=m_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"Novel model '{m_name}' attempt failed: {e}. Trying fallback...")
+
+        if last_exception:
+            raise last_exception
+        return ""
+
 
