@@ -837,10 +837,13 @@ def setup_handlers(application: Application) -> None:
     # Super VIP Exclusive Novelist Commands
     application.add_handler(CommandHandler("novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
+    application.add_handler(CommandHandler("novel_18", novel_18_command))
+    application.add_handler(CommandHandler("Novel_18", novel_18_command))
     application.add_handler(CommandHandler("novel_18+", novel_18_command))
     application.add_handler(CommandHandler("Novel_18+", novel_18_command))
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
+
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 
