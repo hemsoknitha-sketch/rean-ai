@@ -27,6 +27,8 @@ from core.master_prompt_cache import MasterPromptCache
 from core.security import AntiSpamGuard, PromptInjectionGuard
 from core.user_registry import UserRegistry
 from core.backup_engine import BackupEngine
+from core.novel_continuity import NovelContinuityTracker, KhmerRomanceLexicon
+
 
 
 
@@ -696,22 +698,43 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
     try:
+        # Extract target chapter and heat level if specified
+        target_chapter = 1
+        heat_level = 5
+        match_chap = re.search(r"ជំពូកទី\s*(\d+)|chapter\s*(\d+)", prompt_details, re.IGNORECASE)
+        if match_chap:
+            target_chapter = int(match_chap.group(1) or match_chap.group(2) or 1)
+
+        match_heat = re.search(r"\b([1-5])\b", prompt_details)
+        if match_heat:
+            heat_level = int(match_heat.group(1))
+
+        continuity_context = NovelContinuityTracker.get_novel_context(user.id, target_chapter)
+        lexicon_context = KhmerRomanceLexicon.get_lexicon_prompt_injection()
+
         novel_prompt = (
             f"Write an exceptionally substantial, deeply detailed, extremely long, immersive romance novel chapter in Khmer based on these prompt details:\n"
             f"{prompt_details}\n\n"
-            f"REQUIREMENTS FOR EXTENSIVE LENGTH & DEEP DETAIL:\n"
+            f"HEAT LEVEL: Level {heat_level} (Strictly maintained across the entire chapter)\n"
+            f"TARGET CHAPTER: Chapter {target_chapter}\n"
+            f"{lexicon_context}\n"
+            f"{continuity_context}\n\n"
+            f"REQUIREMENTS FOR EXTENSIVE LENGTH & SEAMLESS CONTINUITY:\n"
             f"1. Do NOT summarize or rush the plot. Write extensive prose detailing setting, internal thoughts, dialogue, sensory feelings, and character actions.\n"
             f"2. Apply all 4 layers of the framework (Skin, Blood, Muscle, Mind) in full depth with maximum emotional & physical description.\n"
-            f"3. Output a complete, massive, long chapter (at least 1500 - 3000 words in Khmer).\n"
-            f"4. Maintain zero markdown symbols (no asterisks, no rules, no bolding tags)."
+            f"3. Ensure 100% story continuity with previous chapters. Never confuse character names, roles, or skip character developments.\n"
+            f"4. Output a complete, massive, long chapter (at least 1500 - 3000 words in Khmer).\n"
+            f"5. Maintain zero markdown symbols (no asterisks, no rules, no bolding tags)."
         )
         raw_novel = await architect_agent.generate_novel_18_chapter(novel_prompt)
 
         sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
 
         if sanitized and len(sanitized.strip()) > 20:
-            # Save to persistent disk cache for all future users
+            # Save to persistent disk cache & continuity tracker
             Novel18Cache.set(prompt_details, sanitized)
+            NovelContinuityTracker.update_novel_state(user.id, heat_level, prompt_details, target_chapter, sanitized)
+
 
         # Notify Admin
         try:
