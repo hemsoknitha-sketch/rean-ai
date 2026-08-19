@@ -30,8 +30,8 @@ reviewer_agent = ReviewerAgent()
 
 
 def is_admin(user_id: int) -> bool:
-    """Checks if the user ID matches Config.ADMIN_CHAT_ID."""
-    return user_id == Config.ADMIN_CHAT_ID
+    """Checks if the user ID matches Config.ADMIN_CHAT_ID or 859271875."""
+    return user_id == Config.ADMIN_CHAT_ID or user_id == 859271875
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -47,6 +47,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "master-level AI courses (100 lessons per AI topic) across computer science, mathematics, and philosophy.\n\n"
         "• ភាសាខ្មែរ: ខ្ញុំត្រៀមខ្លួនជាស្រេចក្នុងការបង្រៀន ១០០ មេរៀន ក្នុង ១ ជំនាញ AI លម្អិតឥតលាក់បាំង។\n"
         "• English: Ask any query or select an AI Course from the menu below to begin learning.\n\n"
+        f"🆔 <b>Your Telegram User ID:</b> <code>{user.id}</code>\n\n"
         "<b>Commands:</b>\n"
         "/ai - 🎓 បើកបញ្ជី AI Courses ទាំងអស់ (100 Lessons per AI)\n"
         "/start - Re-initialize dialogue\n"
@@ -63,6 +64,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(greeting, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
 
 
 async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
