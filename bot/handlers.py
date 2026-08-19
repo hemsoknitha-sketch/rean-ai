@@ -350,7 +350,7 @@ async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         name = " ".join(context.args[2:]) if len(context.args) > 2 else "VIP User"
         is_lifetime = (days <= 0)
 
-        expiry_display = VIPManager.add_vip(target_id, name=name, days=days, is_lifetime=is_lifetime)
+        expiry_display = VIPManager.add_vip(target_id, name=name, days=days, tier="VIP", is_lifetime=is_lifetime)
         await update.message.reply_text(
             f"✅ <b>VIP License Granted Successfully!</b>\n\n"
             f"👤 <b>User:</b> {name}\n"
@@ -361,6 +361,49 @@ async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         )
     except Exception as e:
         await update.message.reply_text(f"⚠️ <b>Error:</b> Invalid parameters ({e}).", parse_mode=ParseMode.HTML)
+
+
+async def addsupervip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /addsupervip <user_id> [days] [name] to grant Super VIP tier."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    if not context.args:
+        text = (
+            "🌟 <b>GRANT SUPER VIP LICENSE TOOL</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "To grant or extend SUPER VIP tier to a user, type:\n\n"
+            "<code>/addsupervip <user_id> [days] [name]</code>\n\n"
+            "<i>Examples:</i>\n"
+            "• <code>/addsupervip 123456789 30</code> (Grants 30 days Super VIP)\n"
+            "• <code>/addsupervip 123456789 365 Super VIP Pro</code> (Grants 1 year Super VIP)\n"
+            "• <code>/addsupervip 123456789 0 Lifetime Elite</code> (Grants Lifetime Super VIP)\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    try:
+        target_id = int(context.args[0])
+        days = int(context.args[1]) if len(context.args) > 1 else 30
+        name = " ".join(context.args[2:]) if len(context.args) > 2 else "Super VIP User"
+        is_lifetime = (days <= 0)
+
+        expiry_display = VIPManager.add_vip(target_id, name=name, days=days, tier="SUPER_VIP", is_lifetime=is_lifetime)
+        await update.message.reply_text(
+            f"🌟 <b>SUPER VIP License Granted Successfully!</b>\n\n"
+            f"👤 <b>User:</b> {name}\n"
+            f"🆔 <b>Telegram ID:</b> <code>{target_id}</code>\n"
+            f"👑 <b>Tier:</b> 🌟 SUPER VIP\n"
+            f"⏳ <b>Days Granted:</b> {'LIFETIME' if is_lifetime else f'{days} days'}\n"
+            f"📅 <b>Expires On:</b> <code>{expiry_display}</code>",
+            parse_mode=ParseMode.HTML
+        )
+    except Exception as e:
+        await update.message.reply_text(f"⚠️ <b>Error:</b> Invalid parameters ({e}).", parse_mode=ParseMode.HTML)
+
 
 
 async def delvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -604,11 +647,13 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("clearcache", clearcache_command))
     application.add_handler(CommandHandler("broadcast", broadcast_command))
     
-    # VIP License Management Commands
+    # VIP & Super VIP License Management Commands
     application.add_handler(CommandHandler("addvip", addvip_command))
+    application.add_handler(CommandHandler("addsupervip", addsupervip_command))
     application.add_handler(CommandHandler("delvip", delvip_command))
     application.add_handler(CommandHandler("viplist", viplist_command))
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
 
