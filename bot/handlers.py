@@ -34,7 +34,48 @@ def is_admin(user_id: int) -> bool:
     return user_id == Config.ADMIN_CHAT_ID or user_id == 859271875
 
 
+async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
+    """Splits long text (>3900 chars) into clean paragraph chunks so no text is ever truncated."""
+    max_len = 3900
+    if len(text) <= max_len:
+        try:
+            await target_msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+        except Exception:
+            plain_text = re.sub(r"<[^>]+>", "", text)
+            await target_msg.reply_text(plain_text, reply_markup=reply_markup)
+        return
+
+    # Split into paragraph chunks safely
+    paragraphs = text.split("\n\n")
+    chunks = []
+    current_chunk = []
+    current_length = 0
+
+    for p in paragraphs:
+        if current_length + len(p) + 2 > max_len:
+            if current_chunk:
+                chunks.append("\n\n".join(current_chunk))
+            current_chunk = [p]
+            current_length = len(p)
+        else:
+            current_chunk.append(p)
+            current_length += len(p) + 2
+
+    if current_chunk:
+        chunks.append("\n\n".join(current_chunk))
+
+    for i, chunk in enumerate(chunks):
+        is_last = (i == len(chunks) - 1)
+        m_markup = reply_markup if is_last else None
+        try:
+            await target_msg.reply_text(chunk, parse_mode=ParseMode.HTML, reply_markup=m_markup)
+        except Exception:
+            plain_text = re.sub(r"<[^>]+>", "", chunk)
+            await target_msg.reply_text(plain_text, reply_markup=m_markup)
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
     """Handles /start command with a trilingual Polymath Grandmaster greeting."""
     user = update.effective_user
     chat_id = update.effective_chat.id
@@ -339,11 +380,7 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            try:
-                await query.message.reply_text(sanitized, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-            except Exception:
-                plain_text = re.sub(r"<[^>]+>", "", sanitized)
-                await query.message.reply_text(plain_text, reply_markup=reply_markup)
+            await send_long_message(query.message, sanitized, reply_markup=reply_markup)
 
         except Exception as err:
             logger.error(f"Failed to generate lesson {lesson_title}: {err}", exc_info=True)
@@ -351,7 +388,6 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
                 f"⚠️ <b>មានបញ្ហាក្នុងការទាញយកមេរៀន៖</b> {err}\n\nសូមព្យាយាមចុចរៀនម្តងទៀត ឬជ្រើសរើសមេរៀនផ្សេង។",
                 parse_mode=ParseMode.HTML
             )
-
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -399,11 +435,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         response=sanitized_response
     )
 
-    try:
-        await update.message.reply_text(sanitized_response, parse_mode=ParseMode.HTML)
-    except Exception:
-        plain_text = re.sub(r"<[^>]+>", "", sanitized_response)
-        await update.message.reply_text(plain_text)
+    await send_long_message(update.message, sanitized_response)
+
 
 
 def setup_handlers(application: Application) -> None:

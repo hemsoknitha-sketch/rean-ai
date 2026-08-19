@@ -114,9 +114,10 @@ class ArchitectAgent:
             )
 
         # 4. Determine Dynamic Search Grounding requirement to eliminate unnecessary delay
-        # Enable search ONLY if query explicitly asks for recent news or search
+        # Enable search ONLY if query explicitly asks for recent news or search AND it is NOT a lesson request
+        is_lesson_req = "lesson request:" in user_query.lower() or "target lesson:" in user_query.lower()
         search_keywords = ["search", "news", "today", "latest", "ស្វែងរក", "បច្ចុប្បន្នភាព", "ព័ត៌មាន", "ថ្ងៃនេះ"]
-        needs_search = any(kw in user_query.lower() for kw in search_keywords)
+        needs_search = (not is_lesson_req) and any(kw in user_query.lower() for kw in search_keywords)
 
         try:
             loop = asyncio.get_running_loop()
@@ -160,9 +161,10 @@ class ArchitectAgent:
         config = types.GenerateContentConfig(
             system_instruction=APEX_GRANDMASTER_SYSTEM_PROMPT,
             temperature=0.7,
-            max_output_tokens=1024,  # Super fast output token generation
+            max_output_tokens=3072,  # Expanded output tokens for complete unbroken Khmer masterclasses
             tools=tools if tools else None,
         )
+
         response = self.client.models.generate_content(
             model=self.model_name,
             contents=full_prompt,
