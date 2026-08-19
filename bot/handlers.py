@@ -902,6 +902,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await novel_18_command(update, context)
         return
 
+    # Route /master_prompt text commands gracefully
+    if user_query.startswith("/master_prompt") or user_query.startswith("/Master_Prompt") or user_query.startswith("/masterprompt"):
+        context.args = user_query.split()[1:]
+        await master_prompt_command(update, context)
+        return
+
+
     if not await check_vip_access(update, context):
         return
 
