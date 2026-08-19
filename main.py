@@ -23,6 +23,7 @@ async def post_init(application: Application) -> None:
     user_commands = [
         BotCommand("ai", "🎓 បើកបញ្ជី AI Master Courses (100 Lessons per AI)"),
         BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)"),
+        BotCommand("novel_18+", "🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)"),
         BotCommand("start", "🚀 ចាប់ផ្តើមការសន្ទនា និងស្វាគមន៍ (Start)"),
         BotCommand("help", "💡 មើលការណែនាំ និងសមត្ថភាព AI (Help)"),
         BotCommand("reset", "🔄 លុបប្រវត្តិសន្ទនាចាស់ (Reset Memory)"),
@@ -38,6 +39,7 @@ async def post_init(application: Application) -> None:
             BotCommand("delvip", "🗑️ Revoke VIP/Super VIP License"),
             BotCommand("viplist", "📋 List All Active Licensed Subscriptions"),
             BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)"),
+            BotCommand("novel_18+", "🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)"),
             BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
             BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
             BotCommand("vip", "🔔 Toggle VIP User Live Activity Alerts"),
@@ -48,6 +50,7 @@ async def post_init(application: Application) -> None:
             BotCommand("help", "💡 View Grandmaster capabilities"),
             BotCommand("reset", "🔄 Clear memory state"),
         ]
+
 
 
 

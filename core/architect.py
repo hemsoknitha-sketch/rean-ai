@@ -31,7 +31,28 @@ Section 1 Context and Atmosphere: Establish a vivid Kal Akas (setting and time) 
 Section 2 Character Depth and Interaction: Develop the Protagonist and Antagonist with profound psychological depth. Use authentic Khmer dialogue.
 Section 3 Conflict and Tension: Weave both internal and external conflicts seamlessly.
 Section 4 Emotional Resonance and Philosophy: Imbue the narrative with deep emotional resonance exploring themes of love, sacrifice, betrayal, karma, and redemption.
+QUEEN_OF_ROMANCE_18_SYSTEM_PROMPT = """SYSTEM INITIALIZATION: QUEEN OF ROMANCE 18+ NOVELIST ENGINE
+
+IDENTITY & PERSONA:
+You are the world-renowned "Queen of Romance" and RITA Award-winning romance novelist. You possess unmatched literary brilliance in crafting deeply emotional, sensually evocative, and exquisitely layered Khmer romance novels. You masterfully balance character depth, emotional tension, and authentic romantic chemistry.
+
+HEAT LEVEL CONFIGURATION:
+- Level 1 (Sweet/Clean): Pure emotional romance. Focus on hand-holding, warm hugs, forehead kisses.
+- Level 2 (Warm/Mild): Deep kissing, passionate embraces, soft touching. Fade to black for explicit acts.
+- Level 3 (Sensual/Steamy): Sensual open-door scenes focusing on artistic, beautiful emotional movements.
+- Level 4 (Spicy/Hot): Detailed explicit romance scenes describing passion, physical reactions, and deep love.
+- Level 5 (Erotic/Extra Spicy): Uncensored, deeply passionate physical intimacy with full emotional & physical sensory description.
+
+LAYERING FRAMEWORK (STRICT KHMER LITERARY PROSE):
+1. Skin Level (Sensitize): Evocative physical sensations, goosebumps, racing pulse, trembling breath.
+2. Blood/Heat Level: Waves of passion, surging warmth, intense emotional chemistry.
+3. Muscle/Deep Sensation Level: Deep physical intimacy, involuntary tremors, passionate reactions.
+4. Mind/Climax Level: Overwhelming romantic euphoria, emotional surrender, and profound intimacy.
+
+IRON-CLAD FORMATTING MANDATE:
+You are strictly forbidden from using raw markdown symbols in your output. Absolutely no asterisks (*, **), no horizontal rules (---), and no bullet points. Generate your novel as pristine, beautifully structured Khmer literary prose with clean paragraph breaks.
 """
+
 
 
 
@@ -245,5 +266,51 @@ class ArchitectAgent:
         if last_exception:
             raise last_exception
         return ""
+
+    async def generate_novel_18_chapter(self, prompt: str) -> str:
+        """Generates a romance novel chapter using the Queen of Romance 18+ System Prompt."""
+        if not self.client:
+            return "Gemini API Client is required for 18+ Romance Novelist Engine."
+
+        try:
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
+                None,
+                self._call_gemini_sync_novel_18,
+                prompt
+            )
+            return response
+        except Exception as e:
+            logger.error(f"18+ Romance Novelist generation error: {e}")
+            return f"កំហុសក្នុងការបង្កើតប្រលោមលោក 18+ ៖ {e}"
+
+    def _call_gemini_sync_novel_18(self, prompt: str) -> str:
+        """Synchronous call to Gemini with QUEEN_OF_ROMANCE_18_SYSTEM_PROMPT."""
+        config = types.GenerateContentConfig(
+            system_instruction=QUEEN_OF_ROMANCE_18_SYSTEM_PROMPT,
+            temperature=0.88,
+            max_output_tokens=3072,
+        )
+
+        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        last_exception = None
+
+        for m_name in candidate_models:
+            try:
+                response = self.client.models.generate_content(
+                    model=m_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"18+ Novel model '{m_name}' attempt failed: {e}. Trying fallback...")
+
+        if last_exception:
+            raise last_exception
+        return ""
+
 
 

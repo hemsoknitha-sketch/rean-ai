@@ -22,8 +22,10 @@ from core.admin import SystemMonitor
 from core.lesson_cache import LessonCache
 from core.vip_manager import VIPManager
 from core.novel_cache import NovelCache
+from core.novel_18_cache import Novel18Cache
 
 logger = logging.getLogger(__name__)
+
 
 
 
@@ -535,6 +537,94 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក៖ {err}", parse_mode=ParseMode.HTML)
 
 
+async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /novel_18+ command. Restricted exclusively to Super VIP members."""
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    # Super VIP Gatekeeping Check
+    if not VIPManager.is_super_vip(user.id):
+        text = (
+            "🌟 <b>ACCESS RESTRICTED: SUPER VIP MEMBERSHIP REQUIRED</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "The <b>/novel_18+</b> feature (Queen of Romance 18+ Novelist Engine) is exclusively available for <b>SUPER VIP Members</b>.\n\n"
+            f"👤 <b>Name:</b> {user.first_name}\n"
+            f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n"
+            "👑 <b>Your Current Tier:</b> VIP User\n\n"
+            "📩 <b>To Upgrade to SUPER VIP Membership:</b>\n"
+            "Contact Super Admin on Telegram to unlock the 18+ Romance Novelist Engine.\n"
+            "• Telegram Admin: <b>@soknitha</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        if update.callback_query:
+            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    # Super VIP User Executing /novel_18+
+    if not context.args:
+        text = (
+            "🔞 <b>QUEEN OF ROMANCE 18+ NOVELIST ENGINE</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "✨ Welcome Super VIP Master! To write an elite 18+ Khmer romance novel chapter, type:\n\n"
+            "<code>/novel_18+ [HEAT_LEVEL 1-5] [Plot Context] [Characters]</code>\n\n"
+            "<i>ឧទាហរណ៍ ៖</i>\n"
+            "<code>/novel_18+ 4 តួប្រុសជា CEO ត្រជាក់ តួស្រីជាលេខា ជាប់ក្នុងជណ្តើរយន្តពេលភ្លើងដាច់, ជំពូកទី ១</code>\n\n"
+            "🔥 <b>HEAT LEVELS:</b>\n"
+            "• <b>Level 1 (Sweet):</b> ថើបថ្ងាស ឱប កាន់ដៃ\n"
+            "• <b>Level 2 (Warm):</b> ថើបបឺតមាត់ (Fade to black)\n"
+            "• <b>Level 3 (Sensual):</b> ឈុតរួមភេទ Sensual (Open door)\n"
+            "• <b>Level 4 (Spicy/Hot):</b> ពិពណ៌នាលម្អិតអំពីសកម្មភាពផ្លូវភេទ និងកាយវិការ\n"
+            "• <b>Level 5 (Erotic/Extra Spicy):</b> ពិពណ៌នាគ្រប់ចំណុច គ្មានដែនកំណត់\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    prompt_details = " ".join(context.args)
+
+    # 1. Check Persistent 18+ Novel Disk Cache (0.001s Instant Response + $0 API Cost)
+    cached_novel = Novel18Cache.get(prompt_details)
+    if cached_novel:
+        await send_long_message(update.message, cached_novel)
+        return
+
+    status_msg = await update.message.reply_text("✍️ <b>កំពុងនិពន្ធប្រលោមលោក 18+ តាមទម្រង់ Queen of Romance Engine...</b>", parse_mode=ParseMode.HTML)
+    await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
+    try:
+        novel_prompt = (
+            f"Generate a full romance novel chapter based on these details:\n"
+            f"{prompt_details}\n\n"
+            f"Strictly apply the Queen of Romance persona, Heat Level requested, Layering Framework (Skin, Blood, Muscle, Mind), and zero raw markdown symbols."
+        )
+        raw_novel = await architect_agent.generate_novel_18_chapter(novel_prompt)
+        sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
+
+        if sanitized and len(sanitized.strip()) > 20:
+            # Save to persistent disk cache for all future users
+            Novel18Cache.set(prompt_details, sanitized)
+
+        # Notify Admin
+        try:
+            await SystemMonitor.notify_admin_live_activity(
+                bot=context.bot,
+                user=user,
+                query=f"/novel_18+ {prompt_details}",
+                response=sanitized
+            )
+        except Exception:
+            pass
+
+        await send_long_message(update.message, sanitized)
+
+    except Exception as err:
+        logger.error(f"18+ Romance Novelist generation failed: {err}")
+        await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក 18+ ៖ {err}", parse_mode=ParseMode.HTML)
+
+
+
 
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
@@ -738,12 +828,15 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("delvip", delvip_command))
     application.add_handler(CommandHandler("viplist", viplist_command))
 
-    # Super VIP Exclusive Novelist Command
+    # Super VIP Exclusive Novelist Commands
     application.add_handler(CommandHandler("novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
+    application.add_handler(CommandHandler("novel_18+", novel_18_command))
+    application.add_handler(CommandHandler("Novel_18+", novel_18_command))
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
 
 
 
