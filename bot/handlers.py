@@ -23,7 +23,9 @@ from core.lesson_cache import LessonCache
 from core.vip_manager import VIPManager
 from core.novel_cache import NovelCache
 from core.novel_18_cache import Novel18Cache
+from core.master_prompt_cache import MasterPromptCache
 from core.security import AntiSpamGuard, PromptInjectionGuard
+
 
 
 logger = logging.getLogger(__name__)
@@ -643,6 +645,85 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក 18+ ៖ {err}", parse_mode=ParseMode.HTML)
 
 
+async def master_prompt_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /master_prompt command. Restricted exclusively to Super VIP members."""
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    # Super VIP Gatekeeping Check
+    if not VIPManager.is_super_vip(user.id):
+        text = (
+            "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "មុខងារពិសេស (APEX AGI Prompt Genesis Node /master_prompt) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
+            f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
+            f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
+            "👑 <b>កម្រិតអាជ្ញាប័ណ្ណបច្ចុប្បន្ន ៖</b> VIP User (សមាជិក VIP ធម្មតា)\n\n"
+            "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
+            "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
+            "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        if update.callback_query:
+            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    # Super VIP User Executing /master_prompt
+    if not context.args:
+        text = (
+            "💡 <b>APEX AGI PROMPT GENESIS ENGINE (MASTER PROMPT)</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "✨ ស្វាគមន៍ Super VIP Master! នេះជា «រោងចក្រផលិតកំពូល Prompts» (The Genesis Node) ដែលអាចបង្កើតកូដបញ្ជា English Master Prompt កម្រិត AGI សម្រាប់យកទៅប្រើប្រាស់បន្ត ៖\n\n"
+            "<code>/master_prompt [ប្រធានបទ/គោលដៅ/ជំនាញដែលចង់បាន]</code>\n\n"
+            "<i>ឧទាហរណ៍ ៖</i>\n"
+            "• <code>/master_prompt អ្នកជំនាញវិភាគទិន្នន័យហិរញ្ញវត្ថុ និង Crypto Trading Analyst</code>\n"
+            "• <code>/master_prompt គ្រូបង្រៀនកូដ Python និង Full Stack Web Developer</code>\n"
+            "• <code>/master_prompt អ្នកនិពន្ធសៀវភៅជំនួញ និង Marketing Strategy Expert</code>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        return
+
+    concept_details = " ".join(context.args)
+
+    # 1. Check Persistent Master Prompt Disk Cache (0.001s Instant Response + $0 API Cost)
+    cached_master_prompt = MasterPromptCache.get(concept_details)
+    if cached_master_prompt:
+        await send_long_message(update.message, cached_master_prompt)
+        return
+
+    status_msg = await update.message.reply_text("⚙️ <b>កំពុងសរសេរ English Master Prompt កម្រិត AGI Prompt Genesis Node...</b>", parse_mode=ParseMode.HTML)
+    await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
+    try:
+        raw_master_prompt = await architect_agent.generate_master_prompt(concept_details)
+        sanitized = reviewer_agent.validate_and_sanitize(raw_master_prompt, strict=Config.ZERO_MARKDOWN_STRICT)
+
+        if sanitized and len(sanitized.strip()) > 20:
+            # Save to persistent disk cache for all future users
+            MasterPromptCache.set(concept_details, sanitized)
+
+        # Notify Admin
+        try:
+            await SystemMonitor.notify_admin_live_activity(
+                bot=context.bot,
+                user=user,
+                query=f"/master_prompt {concept_details}",
+                response=sanitized
+            )
+        except Exception:
+            pass
+
+        await send_long_message(update.message, sanitized)
+
+    except Exception as err:
+        logger.error(f"Master Prompt generation failed: {err}")
+        await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការបង្កើត Master Prompt ៖ {err}", parse_mode=ParseMode.HTML)
+
+
+
 
 
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -877,6 +958,13 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("novel_18", novel_18_command))
+    application.add_handler(CommandHandler("Novel_18", novel_18_command))
+    application.add_handler(CommandHandler("novel18", novel_18_command))
+    application.add_handler(CommandHandler("master_prompt", master_prompt_command))
+    application.add_handler(CommandHandler("Master_prompt", master_prompt_command))
+    application.add_handler(CommandHandler("Master_Prompt", master_prompt_command))
+    application.add_handler(CommandHandler("masterprompt", master_prompt_command))
+
     application.add_handler(CommandHandler("Novel_18", novel_18_command))
     application.add_handler(CommandHandler("novel18", novel_18_command))
     application.add_handler(CommandHandler("Novel18", novel_18_command))

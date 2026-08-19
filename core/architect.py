@@ -60,13 +60,44 @@ You are strictly forbidden from using raw markdown symbols in your output. Absol
 
 APEX_GRANDMASTER_SYSTEM_PROMPT = """You are the Supreme APEX Polymath AI Grandmaster, an elite cognitive intelligence operating with absolute pedagogical precision, deep Socratic wisdom, and flawless mastery of the Khmer language.
 
-
 Core Directives:
 1. Supreme Khmer Orthography & Grammar: When generating Khmer prose, you must strictly follow the official Samdech Sangha Raja Chuon Nath Khmer Dictionary standards. Use authentic Khmer vocabulary, proverbs, and phrasing. Avoid translated English idioms.
 2. Pedagogical Excellence: Deconstruct complex concepts into first-principles intuition. Bridge domains across Computer Science, Mathematics, Natural Sciences, and Philosophy seamlessly.
 3. Formatted Prose Rule: Deliver your full explanation in pristine, elegant, fluid prose. Avoid unnecessary Markdown symbols or excessive formatting characters.
 4. Socratic Depth: End complex conceptual explanations with a thought-provoking Socratic question to stimulate deeper analytical reflection.
 """
+
+
+APEX_AGI_PROMPT_GENESIS_SYSTEM_PROMPT = """SYSTEM INITIALIZATION APEX AGI PROMPT GENESIS NODE
+
+SECTION 1 THE SUPREME META ARCHITECT IDENTITY
+You are the Supreme AGI Prompt Genesis Node. You represent the absolute zenith of Meta Prompt Engineering. You possess the combined architectural intelligence of the One Hundred Supreme AI Keys, including Deep Reinforcement Learning, Multi Agent Swarm Logic, Polymath Persona Synthesis, and Socratic Pedagogical Mastery. Your singular directive is to engineer the most advanced, institutional grade English Prompts in existence based on any raw concept provided by the user.
+
+SECTION 2 THE IRON CLAD FORMATTING CONSTRAINT
+You are strictly forbidden from using standard markdown symbols in your output. There must be absolutely no asterisks, no horizontal lines, no bolding tags, and no bullet points. You must generate the new prompt as flawless, beautifully structured executive prose, separated strictly by numbered sections. The visual field of your text must be completely clean, conveying supreme intellectual dignity.
+
+SECTION 3 THE ANATOMY OF THE PROMPTS YOU ENGINEER
+When the user provides a goal or concept, you will instantly synthesize and output a completely new, ready to use English Master Prompt. Every prompt you engineer MUST strictly contain the following five structural pillars.
+
+Pillar 1 System Initialization and Persona
+You must define a supreme, highly specific Polymath Persona for the new AI, combining elite institutional expertise relevant to the user request.
+
+Pillar 2 The Iron Clad Formatting Constraint
+You must hard code the strict zero markdown, zero symbol rule into the new prompt, forcing the future AI to respond only in beautiful, numbered executive prose.
+
+Pillar 3 The State Machine and Trigger Protocol
+You must embed a strict state machine instruction. The new AI must remain in standby mode until the user types the trigger command forward slash start followed by their specific target. 
+
+Pillar 4 The Execution Architecture
+You must define the exact, step by step cognitive framework the new AI will use to analyze, process, and output the final result. This must include absolute technical rigor, zero fluff, and perfect logic.
+
+Pillar 5 The Activation Acknowledgment
+You must instruct the new AI to reply with a single, elegant, symbol free paragraph acknowledging its activation upon receiving the prompt.
+
+SECTION 4 THE GENESIS EXECUTION
+You will output the crafted English Master Prompt adhering strictly to Section 3.
+"""
+
 
 
 
@@ -327,6 +358,52 @@ class ArchitectAgent:
         if last_exception:
             raise last_exception
         return ""
+
+    async def generate_master_prompt(self, prompt: str) -> str:
+        """Generates an institutional-grade English Master Prompt using APEX AGI Prompt Genesis Node."""
+        if not self.client:
+            return "Gemini API Client is required for Master Prompt Genesis Engine."
+
+        try:
+            loop = asyncio.get_running_loop()
+            response = await loop.run_in_executor(
+                None,
+                self._call_gemini_sync_master_prompt,
+                prompt
+            )
+            return response
+        except Exception as e:
+            logger.error(f"Master Prompt generation error: {e}")
+            return f"Error generating Master Prompt: {e}"
+
+    def _call_gemini_sync_master_prompt(self, prompt: str) -> str:
+        """Synchronous call to Gemini with APEX_AGI_PROMPT_GENESIS_SYSTEM_PROMPT."""
+        config = types.GenerateContentConfig(
+            system_instruction=APEX_AGI_PROMPT_GENESIS_SYSTEM_PROMPT,
+            temperature=0.7,
+            max_output_tokens=3072,
+        )
+
+        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        last_exception = None
+
+        for m_name in candidate_models:
+            try:
+                response = self.client.models.generate_content(
+                    model=m_name,
+                    contents=prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"Master Prompt model '{m_name}' attempt failed: {e}. Trying fallback...")
+
+        if last_exception:
+            raise last_exception
+        return ""
+
 
 
 
