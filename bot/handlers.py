@@ -21,8 +21,10 @@ from core.curriculum import CurriculumEngine, AI_COURSES
 from core.admin import SystemMonitor
 from core.lesson_cache import LessonCache
 from core.vip_manager import VIPManager
+from core.novel_cache import NovelCache
 
 logger = logging.getLogger(__name__)
+
 
 
 # Initialize cognitive components
@@ -492,6 +494,13 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return
 
     prompt_details = " ".join(context.args)
+
+    # 1. Check Persistent Novel Disk Cache (0.001s Instant Response + $0 API Cost)
+    cached_novel = NovelCache.get(prompt_details)
+    if cached_novel:
+        await send_long_message(update.message, cached_novel)
+        return
+
     status_msg = await update.message.reply_text("✍️ <b>កំពុងនិពន្ធប្រលោមលោកខ្មែរតាមទម្រង់ APEX Khmer Novelist Grandmaster...</b>", parse_mode=ParseMode.HTML)
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
@@ -503,6 +512,10 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
         raw_novel = await architect_agent.generate_novel_chapter(novel_prompt)
         sanitized = reviewer_agent.validate_and_sanitize(raw_novel, strict=Config.ZERO_MARKDOWN_STRICT)
+
+        if sanitized and len(sanitized.strip()) > 20:
+            # Save to persistent disk cache for all future users
+            NovelCache.set(prompt_details, sanitized)
 
         # Notify Admin
         try:
@@ -520,6 +533,7 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as err:
         logger.error(f"Khmer Novelist generation failed: {err}")
         await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក៖ {err}", parse_mode=ParseMode.HTML)
+
 
 
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
