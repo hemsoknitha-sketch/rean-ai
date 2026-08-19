@@ -213,7 +213,18 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return
 
     if not context.args:
-        await update.message.reply_text("⚠️ <b>Usage:</b> <code>/broadcast <your message></code>", parse_mode=ParseMode.HTML)
+        text = (
+            "📢 <b>BROADCAST ANNOUNCEMENT TOOL</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "To send a broadcast announcement to all active users, please type:\n\n"
+            "<code>/broadcast Your Announcement Text Here</code>\n\n"
+            "<i>Example:</i> <code>/broadcast 🚀 New AI Course Lessons are now available! Click /ai to learn.</code>\n"
+            "━━━━━━━━━━━━━━━━━━━━━"
+        )
+        if update.callback_query:
+            await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
+        else:
+            await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
 
     broadcast_msg = " ".join(context.args)
@@ -225,7 +236,8 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         except Exception:
             pass
 
-    await update.message.reply_text(f"✅ Broadcast sent successfully to {count} users.", parse_mode=ParseMode.HTML)
+    await update.message.reply_text(f"✅ Broadcast sent successfully to {count} active users.", parse_mode=ParseMode.HTML)
+
 
 
 async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -291,40 +303,55 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         chat_id = query.message.chat_id
 
         lesson_title = CurriculumEngine.get_lesson_title(course_key, lesson_num, lang="km")
-        await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
+        status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
         await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
-        prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
-        user_state = state_manager.get_state(chat_id)
-        intent = evaluator_agent.analyze(prompt)
-
-        raw_response = await architect_agent.generate_response(user_query=prompt, user_state=user_state, intent=intent)
-        sanitized = reviewer_agent.validate_and_sanitize(text=raw_response, strict=Config.ZERO_MARKDOWN_STRICT)
-
-        user_state.add_turn(role="user", content=f"Lesson Request: {lesson_title}")
-        user_state.add_turn(role="model", content=sanitized)
-
-        # Notify admin of live activity
-        await SystemMonitor.notify_admin_live_activity(
-            bot=context.bot,
-            user=update.effective_user,
-            query=f"Requested Lesson: {lesson_title}",
-            response=sanitized
-        )
-
-        keyboard = [
-            [
-                InlineKeyboardButton("📖 មេរៀនបន្ទាប់ ▶", callback_data=f"lesson:{course_key}:{min(100, lesson_num+1)}"),
-                InlineKeyboardButton("📚 បញ្ជីមេរៀន", callback_data=f"course:{course_key}:{(lesson_num-1)//10+1}")
-            ]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
         try:
-            await query.message.reply_text(sanitized, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-        except Exception:
-            plain_text = re.sub(r"<[^>]+>", "", sanitized)
-            await query.message.reply_text(plain_text, reply_markup=reply_markup)
+            prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
+            user_state = state_manager.get_state(chat_id)
+            intent = evaluator_agent.analyze(prompt)
+
+            raw_response = await architect_agent.generate_response(user_query=prompt, user_state=user_state, intent=intent)
+            sanitized = reviewer_agent.validate_and_sanitize(text=raw_response, strict=Config.ZERO_MARKDOWN_STRICT)
+
+            if not sanitized or len(sanitized.strip()) < 10:
+                sanitized = f"📘 <b>{lesson_title}</b>\n\nប្រព័ន្ធកំពុងរៀបចំខ្លឹមសារមេរៀននេះឡើងវិញ។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីព្យាយាមម្តងទៀត ឬបន្តទៅមេរៀនបន្ទាប់។"
+
+            user_state.add_turn(role="user", content=f"Lesson Request: {lesson_title}")
+            user_state.add_turn(role="model", content=sanitized)
+
+            # Safe async notification to admin
+            try:
+                await SystemMonitor.notify_admin_live_activity(
+                    bot=context.bot,
+                    user=update.effective_user,
+                    query=f"Requested Lesson: {lesson_title}",
+                    response=sanitized
+                )
+            except Exception as admin_err:
+                logger.warning(f"Admin alert notice: {admin_err}")
+
+            keyboard = [
+                [
+                    InlineKeyboardButton("📖 មេរៀនបន្ទាប់ ▶", callback_data=f"lesson:{course_key}:{min(100, lesson_num+1)}"),
+                    InlineKeyboardButton("📚 បញ្ជីមេរៀន", callback_data=f"course:{course_key}:{(lesson_num-1)//10+1}")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            try:
+                await query.message.reply_text(sanitized, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+            except Exception:
+                plain_text = re.sub(r"<[^>]+>", "", sanitized)
+                await query.message.reply_text(plain_text, reply_markup=reply_markup)
+
+        except Exception as err:
+            logger.error(f"Failed to generate lesson {lesson_title}: {err}", exc_info=True)
+            await query.message.reply_text(
+                f"⚠️ <b>មានបញ្ហាក្នុងការទាញយកមេរៀន៖</b> {err}\n\nសូមព្យាយាមចុចរៀនម្តងទៀត ឬជ្រើសរើសមេរៀនផ្សេង។",
+                parse_mode=ParseMode.HTML
+            )
+
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
