@@ -89,10 +89,12 @@ class CurriculumEngine:
             f"Course: {course_title}\n"
             f"Target Lesson: {lesson_title}\n"
             f"Language Requested: {'Khmer (ភាសាខ្មែរ)' if lang == 'km' else 'English'}\n\n"
-            f"Requirements:\n"
-            f"1. Explain from First-Principles with absolute clarity, deep pedagogical intuition, and ZERO shortcuts.\n"
-            f"2. Provide step-by-step breakdowns, practical code/prompt examples, and real-world usage.\n"
-            f"3. Structure with clean emojis and bold section titles.\n"
-            f"4. Conclude with 1 Socratic Question and a call-to-action to proceed to Lesson {lesson_num + 1}."
+            f"STRICT PEDAGOGICAL & FORMATTING REQUIREMENTS:\n"
+            f"1. **Deep Pedagogical Intuition**: Explain the lesson from First-Principles Thinking. Teach the *why* before the *how*. Make complex concepts crystal clear with real-world analogies.\n"
+            f"2. **Pristine Visual Structure**: Structure the response with clear numbered sections (១. , ២. , ៣. ), bullet points (•), bold section headers, and relevant emojis.\n"
+            f"3. **Zero Clutter**: Do NOT output raw Markdown symbols like `###` or loose `**`. Keep the text beautifully formatted and readable.\n"
+            f"4. **Practical Code & Examples**: Provide complete, working code blocks or step-by-step prompt examples where applicable.\n"
+            f"5. **Interactive Summary**: End with a Socratic Thought Question and an invitation to click 'មេរៀនបន្ទាប់ ▶' for Lesson {lesson_num + 1}."
         )
         return prompt
+
