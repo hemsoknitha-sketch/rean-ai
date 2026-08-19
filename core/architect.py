@@ -150,9 +150,8 @@ class ArchitectAgent:
             )
 
     def _call_gemini_sync(self, full_prompt: str, needs_search: bool = False) -> str:
-        """Synchronous wrapper for Gemini API client generate_content call with optimized tokens."""
+        """Synchronous wrapper for Gemini API client generate_content call with model fallback support."""
         tools = []
-        # Dynamic search grounding: Only enable when explicitly needed for maximum speed
         if Config.ENABLE_SEARCH_GROUNDING and needs_search:
             tools.append({"google_search": {}})
         if Config.ENABLE_CODE_EXECUTION:
@@ -165,9 +164,24 @@ class ArchitectAgent:
             tools=tools if tools else None,
         )
 
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=full_prompt,
-            config=config,
-        )
-        return response.text if response and response.text else ""
+        # Candidate fallback models if primary model hits rate limits or quota
+        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        last_exception = None
+
+        for m_name in candidate_models:
+            try:
+                response = self.client.models.generate_content(
+                    model=m_name,
+                    contents=full_prompt,
+                    config=config,
+                )
+                if response and response.text:
+                    return response.text
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"Model '{m_name}' execution attempt failed: {e}. Trying fallback candidate...")
+
+        if last_exception:
+            raise last_exception
+        return ""
+
