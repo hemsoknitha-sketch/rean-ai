@@ -25,6 +25,8 @@ from core.novel_cache import NovelCache
 from core.novel_18_cache import Novel18Cache
 from core.master_prompt_cache import MasterPromptCache
 from core.security import AntiSpamGuard, PromptInjectionGuard
+from core.user_registry import UserRegistry
+
 
 
 
@@ -123,8 +125,30 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     state_manager.reset_state(chat_id)
     SystemMonitor.active_users.add(chat_id)
 
+    # 1. Register User in Database & check if first time registration
+    is_new_user, user_info = UserRegistry.register_user(user)
+
+    # 2. Send Real-time Admin Alert on First Time Registration
+    if is_new_user and Config.ADMIN_CHAT_ID and user.id != Config.ADMIN_CHAT_ID:
+        try:
+            username_str = f" (@{user.username})" if user.username else ""
+            alert_text = (
+                "🎉 <b>NEW FREE USER REGISTERED ALERT</b>\n"
+                "━━━━━━━━━━━━━━━━━━━━━\n"
+                f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}{username_str}\n"
+                f"🆔 <b>Telegram ID ៖</b> <code>{user.id}</code>\n"
+                f"📅 <b>កាលបរិច្ឆេទ ៖</b> <code>{user_info.get('joined_at', '')}</code>\n"
+                "👑 <b>ស្ថានភាព ៖</b> 🔴 Free User (មិនទាន់ជាវ VIP)\n"
+                "━━━━━━━━━━━━━━━━━━━━━\n"
+                f"💡 <i>Admin អាចប្រើបញ្ជា <code>/addvip {user.id} 30 {user.first_name}</code> ដើម្បីបើកសិទ្ធិ VIP!</i>"
+            )
+            await context.bot.send_message(chat_id=Config.ADMIN_CHAT_ID, text=alert_text, parse_mode=ParseMode.HTML)
+        except Exception as e:
+            logger.warning(f"Failed to send new user alert to admin: {e}")
+
     is_user_vip = VIPManager.is_vip(user.id)
     vip_info = VIPManager.get_vip_info(user.id)
+
     
     if is_user_vip:
         tier_str = vip_info.get('tier', 'SUPER_VIP') if vip_info else "SUPER_VIP / Admin"
@@ -473,6 +497,39 @@ async def viplist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     text = "📋 <b>VIP LICENSED USERS DATABASE</b>\n━━━━━━━━━━━━━━━━━━━━━\n" + "\n\n".join(lines) + "\n━━━━━━━━━━━━━━━━━━━━━"
     await send_long_message(update.message, text)
+
+
+async def new_user_list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /new_user_list to view all free users registered on /start but not yet VIP."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
+        return
+
+    free_users = UserRegistry.get_free_users()
+    if not free_users:
+        await update.message.reply_text("📋 <b>FREE USERS LEAD DATABASE</b>\n\n<i>មិនទាន់មាន Free User ណាមួយចុះឈ្មោះឡើយ។</i>", parse_mode=ParseMode.HTML)
+        return
+
+    lines = [
+        "📋 <b>FREE USERS LEAD DATABASE (មិនទាន់ក្លាយជា VIP)</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📊 <b>ចំនួន Free Leads សរុប ៖</b> <b>{len(free_users)} នាក់</b>\n"
+    ]
+
+    for idx, u in enumerate(free_users[:100], 1):
+        uname = u.get("name", "User")
+        u_handle = f" (@{u['username']})" if u.get("username") else ""
+        u_id = u.get("id")
+        u_joined = u.get("joined_at", "N/A")
+        lines.append(f"{idx}. 👤 <b>{uname}</b>{u_handle}\n   🆔 ID: <code>{u_id}</code> | 📅 Joined: <code>{u_joined}</code>")
+
+    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    lines.append("💡 <i>Admin អាចប្រើ <code>/addvip [id] [days] [name]</code> ឬ <code>/addsupervip [id] [days] [name]</code> ដើម្បីដំឡើងសិទ្ធិ!</i>")
+
+    full_text = "\n".join(lines)
+    await send_long_message(update.message, full_text)
+
 
 
 async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -959,6 +1016,9 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("delsupervip", delvip_command))
     application.add_handler(CommandHandler("viplist", viplist_command))
     application.add_handler(CommandHandler("superviplist", viplist_command))
+    application.add_handler(CommandHandler("new_user_list", new_user_list_command))
+    application.add_handler(CommandHandler("newuserlist", new_user_list_command))
+
 
 
     # Super VIP Exclusive Novelist Commands

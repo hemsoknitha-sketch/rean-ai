@@ -45,7 +45,9 @@ async def post_init(application: Application) -> None:
             BotCommand("addsupervip", "🌟 Grant or Extend Super VIP License"),
             BotCommand("delvip", "🗑️ Revoke VIP/Super VIP License"),
             BotCommand("viplist", "📋 List All Active VIP Subscriptions"),
+            BotCommand("new_user_list", "📋 List Registered Free Users (Non-VIP Leads)"),
             BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
+
             BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
             BotCommand("vip", "🔔 Toggle VIP User Activity Alerts"),
             BotCommand("clearcache", "🧹 Flush Instant Response Cache"),
