@@ -15,7 +15,7 @@ from telegram.ext import (
 from config import Config
 from memory.state_manager import StateManager
 from core.evaluator import EvaluatorAgent
-from core.architect import ArchitectAgent, response_cache
+from core.architect import ArchitectAgent
 from core.reviewer import ReviewerAgent
 from core.curriculum import CurriculumEngine, AI_COURSES
 from core.admin import SystemMonitor
@@ -194,12 +194,13 @@ async def clearcache_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text("⛔ <i>Access Denied. Admin privileges required.</i>", parse_mode=ParseMode.HTML)
         return
 
-    response_cache.clear()
+    architect_agent.cache.cache.clear()
     text = "🧹 <b>Response Cache Flushed!</b> Instant memory cache cleared successfully."
     if update.callback_query:
         await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
     else:
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+
 
 
 async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
