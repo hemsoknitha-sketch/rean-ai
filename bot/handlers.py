@@ -139,7 +139,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "🌟 <b>កញ្ចប់សេវាកម្មអាជ្ញាប័ណ្ណ (MEMBERSHIP TIERS) ៖</b>\n\n"
         "១. <b>👑 VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ VIP) ៖</b>\n"
         "• ចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន (១០០ មេរៀនក្នុង ១ ប្រធានបទ AI)\n"
-        "• សួរសំណួរទូទៅ និងដោះស្រាយលំហាត់ល្បឿនលឿន <b>< 1 វិនាទី ($0 API Limit)</b>\n\n"
+        "• សួរសំណួរទូទៅ និងដោះស្រាយលំហាត់ល្បឿនលឿន <b>ក្រោម ១ វិនាទី ($0 API Limit)</b>\n\n"
+
         "២. <b>🌟 SUPER VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ Super VIP) ៖</b>\n"
         "• ទទួលបានអត្ថប្រយោជន៍ VIP ទាំងអស់ ១០០%\n"
         "• 📖 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីននិពន្ធប្រលោមលោកខ្មែរ <b>/novel_kh</b> (APEX Khmer Novelist Engine)\n"
