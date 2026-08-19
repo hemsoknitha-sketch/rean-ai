@@ -710,7 +710,8 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             heat_level = int(match_heat.group(1))
 
         continuity_context = NovelContinuityTracker.get_novel_context(user.id, target_chapter)
-        lexicon_context = KhmerRomanceLexicon.get_lexicon_prompt_injection()
+        lexicon_context = KhmerRomanceLexicon.get_lexicon_prompt_injection(heat_level)
+
 
         novel_prompt = (
             f"Write an exceptionally substantial, deeply detailed, extremely long, immersive romance novel chapter in Khmer based on these prompt details:\n"

@@ -33,16 +33,31 @@ class KhmerRomanceLexicon:
     ]
 
     @classmethod
-    def get_lexicon_prompt_injection(cls) -> str:
-        """Injects RAM Lexicon vocabulary instructions into system prompts."""
+    def get_heat_level_guidelines(cls, level: int) -> str:
+        """Returns specific sensory guidelines according to exact Heat Level (1 to 5)."""
+        profiles = {
+            1: "HEAT LEVEL 1 (SWEET): Focus on deep emotional affection, gentle gazes, blush, hand tremors, tender whispers, warm hugs, and subtle forehead kisses.",
+            2: "HEAT LEVEL 2 (WARM): Deep passionate kissing, racing pulses, lingering caresses, catching breath, sensual embraces, and intense emotional tension.",
+            3: "HEAT LEVEL 3 (SENSUAL): Open-door sensual romance, detailed skin sensitivity, goosebumps, gasps, slow seductive build-up, and artistic physical closeness.",
+            4: "HEAT LEVEL 4 (SPICY): Highly detailed explicit romance describing passion, physical reactions, muscle tremors, breathlessness, and deep physical surrender.",
+            5: "HEAT LEVEL 5 (EXTRA SPICY / EROTIC): Uncensored, deeply passionate physical intimacy with full physical & emotional sensory description, raw physical reactions, and complete surrender."
+        }
+        return profiles.get(level, profiles[5])
+
+    @classmethod
+    def get_lexicon_prompt_injection(cls, level: int = 5) -> str:
+        """Injects RAM Lexicon vocabulary and Heat Level specific profile into system prompts."""
         skin_str = ", ".join(cls.SKIN_LEVEL_TERMS[:5])
         heat_str = ", ".join(cls.HEAT_LEVEL_TERMS[:5])
+        heat_profile = cls.get_heat_level_guidelines(level)
         return (
             f"KHMER ROMANCE LEXICON (RAM MEMORY INTEGRATED):\n"
             f"• Sensory Vocabulary: {skin_str}\n"
             f"• Emotional & Heat Terms: {heat_str}\n"
+            f"• {heat_profile}\n"
             f"• Adhere strictly to Samdech Sangha Raja Chuon Nath Khmer Dictionary prose."
         )
+
 
 
 class NovelContinuityTracker:
