@@ -51,16 +51,17 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return True
 
     text = (
-        "🔒 <b>ACCESS RESTRICTED: VIP MEMBERSHIP REQUIRED</b>\n"
+        "🔒 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ VIP MEMBERSHIP</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n"
-        "To access the Supreme Polymath AI Masterclasses and Cognitive AI Engine, please upgrade your account to VIP Membership.\n\n"
-        f"👤 <b>Name:</b> {user.first_name}\n"
-        f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n\n"
-        "📩 <b>To Purchase or Activate VIP License:</b>\n"
-        "Contact Super Admin on Telegram to get authorized access.\n"
-        "• Telegram Admin: <b>@soknitha</b>\n"
+        "ដើម្បីចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន និងប្រើប្រាស់ AI Cognitive Engine សូមធ្វើការដំឡើងគណនីរបស់លោកអ្នកទៅជា <b>VIP Membership</b>។\n\n"
+        f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
+        f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n\n"
+        "📩 <b>ទំនាក់ទំនងដើម្បីជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ VIP ៖</b>\n"
+        "សូមផ្ញើលេខ Telegram ID ខាងលើទៅកាន់ Admin ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
+        "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━"
     )
+
 
     if update.callback_query:
         await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -472,15 +473,15 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     # Super VIP Gatekeeping Check
     if not VIPManager.is_super_vip(user.id):
         text = (
-            "🌟 <b>ACCESS RESTRICTED: SUPER VIP MEMBERSHIP REQUIRED</b>\n"
+            "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
-            "The <b>/novel_kh</b> feature (APEX Khmer Novelist Grandmaster Engine) is exclusively available for <b>SUPER VIP Members</b>.\n\n"
-            f"👤 <b>Name:</b> {user.first_name}\n"
-            f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n"
-            "👑 <b>Your Current Tier:</b> VIP User\n\n"
-            "📩 <b>To Upgrade to SUPER VIP Membership:</b>\n"
-            "Contact Super Admin on Telegram to unlock the Khmer Novelist Engine.\n"
-            "• Telegram Admin: <b>@soknitha</b>\n"
+            "មុខងារពិសេស (APEX Khmer Novelist & Queen of Romance 18+ Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
+            f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
+            f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
+            "👑 <b>កម្រិតអាជ្ញាប័ណ្ណបច្ចុប្បន្ន ៖</b> VIP User (សមាជិក VIP ធម្មតា)\n\n"
+            "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
+            "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
+            "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━"
         )
         if update.callback_query:
@@ -488,6 +489,7 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         else:
             await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
+
 
     # Super VIP User Executing /novel_kh
     if not context.args:
@@ -553,15 +555,15 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     # Super VIP Gatekeeping Check
     if not VIPManager.is_super_vip(user.id):
         text = (
-            "🌟 <b>ACCESS RESTRICTED: SUPER VIP MEMBERSHIP REQUIRED</b>\n"
+            "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
-            "The <b>/novel_18+</b> feature (Queen of Romance 18+ Novelist Engine) is exclusively available for <b>SUPER VIP Members</b>.\n\n"
-            f"👤 <b>Name:</b> {user.first_name}\n"
-            f"🆔 <b>Your Telegram ID:</b> <code>{user.id}</code>\n"
-            "👑 <b>Your Current Tier:</b> VIP User\n\n"
-            "📩 <b>To Upgrade to SUPER VIP Membership:</b>\n"
-            "Contact Super Admin on Telegram to unlock the 18+ Romance Novelist Engine.\n"
-            "• Telegram Admin: <b>@soknitha</b>\n"
+            "មុខងារពិសេស (APEX Khmer Novelist & Queen of Romance 18+ Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
+            f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
+            f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
+            "👑 <b>កម្រិតអាជ្ញាប័ណ្ណបច្ចុប្បន្ន ៖</b> VIP User (សមាជិក VIP ធម្មតា)\n\n"
+            "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
+            "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
+            "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━"
         )
         if update.callback_query:
@@ -569,6 +571,7 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         else:
             await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
+
 
     # Super VIP User Executing /novel_18+
     if not context.args:
