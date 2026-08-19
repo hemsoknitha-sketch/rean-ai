@@ -21,38 +21,36 @@ async def post_init(application: Application) -> None:
     """Configures Telegram Bot Commands Menu for regular users and Admin scope."""
     # Regular user menu (Visible to all users, including VIP users)
     user_commands = [
-        BotCommand("ai", "🎓 បើកបញ្ជី AI Master Courses (100 Lessons per AI)"),
-        BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)"),
-        BotCommand("novel_18", "🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)"),
-        BotCommand("start", "🚀 ចាប់ផ្តើមការសន្ទនា និងស្វាគមន៍ (Start)"),
-        BotCommand("help", "💡 មើលការណែនាំ និងសមត្ថភាព AI (Help)"),
-        BotCommand("reset", "🔄 លុបប្រវត្តិសន្ទនាចាស់ (Reset Memory)"),
+        BotCommand("start", "🚀 ចាប់ផ្តើម និងពិនិត្យគណនី (Start & Account)"),
+        BotCommand("ai", "🎓 បើកបញ្ជី AI Courses (100 Lessons per AI)"),
+        BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (APEX Novelist)"),
+        BotCommand("novel_18", "🔞 និពន្ធប្រលោមលោក 18+ (Romance 18+ Engine)"),
+        BotCommand("reset", "🔄 លុបប្រវត្តិសន្ទនា (Reset Thread Memory)"),
+        BotCommand("help", "💡 មើលការណែនាំ និងស្ថាបត្យកម្ម (Help & Specs)"),
     ]
     await application.bot.set_my_commands(user_commands, scope=BotCommandScopeDefault())
 
     # Admin scope menu specifically for Admin ID 859271875
     if Config.ADMIN_CHAT_ID:
         admin_commands = [
-            BotCommand("admin", "🎛️ Admin Control Panel (VIP Dashboard)"),
-            BotCommand("addvip", "🔑 Grant or Extend VIP License for User"),
-            BotCommand("addsupervip", "🌟 Grant or Extend Super VIP License for User"),
-            BotCommand("delvip", "🗑️ Revoke VIP License"),
-            BotCommand("delsupervip", "🗑️ Revoke Super VIP License"),
+            BotCommand("start", "🚀 Start & Re-initialize Dialogue"),
+            BotCommand("ai", "🎓 AI Master Courses (100 Lessons per Topic)"),
+            BotCommand("novel_kh", "📖 APEX Khmer Novelist Engine"),
+            BotCommand("novel_18", "🔞 Queen of Romance 18+ Engine"),
+            BotCommand("admin", "🎛️ Super Admin Control Panel"),
+            BotCommand("addvip", "🔑 Grant or Extend VIP License"),
+            BotCommand("addsupervip", "🌟 Grant or Extend Super VIP License"),
+            BotCommand("delvip", "🗑️ Revoke VIP/Super VIP License"),
             BotCommand("viplist", "📋 List All Active VIP Subscriptions"),
-            BotCommand("superviplist", "📋 List All Active Super VIP Subscriptions"),
-            BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (Super VIP Feature)"),
-            BotCommand("novel_18", "🔞 និពន្ធប្រលោមលោក 18+ (Super VIP Feature)"),
-
             BotCommand("status", "📊 VPS Health, CPU, RAM & Disk Usage"),
             BotCommand("models", "🤖 View Active AI Models & Ollama Engine"),
-            BotCommand("vip", "🔔 Toggle VIP User Live Activity Alerts"),
+            BotCommand("vip", "🔔 Toggle VIP User Activity Alerts"),
             BotCommand("clearcache", "🧹 Flush Instant Response Cache"),
             BotCommand("broadcast", "📢 Broadcast Announcement to All Users"),
-            BotCommand("ai", "🎓 បើកបញ្ជី AI Master Courses"),
-            BotCommand("start", "🚀 Re-initialize dialogue"),
-            BotCommand("help", "💡 View Grandmaster capabilities"),
-            BotCommand("reset", "🔄 Clear memory state"),
+            BotCommand("reset", "🔄 Clear Dialogue Memory"),
+            BotCommand("help", "💡 View Polymath Architecture & Specs"),
         ]
+
 
 
 
