@@ -137,12 +137,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         try:
             username_str = f" (@{user.username})" if user.username else ""
             alert_text = (
-                "🎉 <b>NEW FREE USER REGISTERED ALERT</b>\n"
+                "🎉 <b>NEW USER REGISTERED ALERT</b>\n"
                 "━━━━━━━━━━━━━━━━━━━━━\n"
                 f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}{username_str}\n"
                 f"🆔 <b>Telegram ID ៖</b> <code>{user.id}</code>\n"
                 f"📅 <b>កាលបរិច្ឆេទ ៖</b> <code>{user_info.get('joined_at', '')}</code>\n"
-                "👑 <b>ស្ថានភាព ៖</b> 🔴 Free User (មិនទាន់ជាវ VIP)\n"
+                "👑 <b>ស្ថានភាព ៖</b> 🔴 មិនទាន់ជាវ VIP (Standard Lead)\n"
                 "━━━━━━━━━━━━━━━━━━━━━\n"
                 f"💡 <i>Admin អាចប្រើបញ្ជា <code>/addvip {user.id} 30 {user.first_name}</code> ដើម្បីបើកសិទ្ធិ VIP!</i>"
             )
@@ -159,19 +159,19 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         remaining_days = vip_info.get("remaining_days", "Unlimited") if vip_info else "Lifetime"
         vip_status_str = f"🟢 ACTIVE ({tier_str} - {remaining_days})"
     else:
-        vip_status_str = "🔴 INACTIVE (Free User - Upgrade Required for Courses & Novel Engine)"
+        vip_status_str = "🔴 គណនីស្តង់ដារ (Standard Account) - ទាមទារអាជ្ញាប័ណ្ណ VIP ដើម្បីចូលរៀន"
 
     greeting = (
         f"✨ <b>ស្វាគមន៍មកកាន់ SUPREME POLYMATH AI GRANDMASTER!</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n"
         f"👋 ជម្រាបសួរ <b>{user.first_name}</b>!\n"
-        "ខ្ញុំគឺជាបណ្តាញខួរក្បាលសិប្បនិម្មិត <b>Polymath AI Grandmaster</b> ដែលមានសមត្ថភាពខ្ពស់បំផុតក្នុងការបង្រៀន AI Masterclasses ទាំង ៧០០ មេរៀន និងនិពន្ធប្រលោមលោកខ្មែរគ្រប់កម្រិត!\n\n"
+        "ខ្ញុំគឺជាបណ្តាញខួរក្បាលសិប្បនិម្មិត <b>Polymath AI Grandmaster</b> ដែលមានសមត្ថភាពខ្ពស់បំផុតក្នុងការបង្រៀន AI Masterclasses ទាំង ១,២០០ មេរៀន (១២ ជំនាញ AI) និងនិពន្ធប្រលោមលោកខ្មែរគ្រប់កម្រិត!\n\n"
         f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
         f"👑 <b>ស្ថានភាពអាជ្ញាប័ណ្ណ ៖</b> {vip_status_str}\n\n"
         "🌟 <b>កញ្ចប់សេវាកម្មអាជ្ញាប័ណ្ណ (MEMBERSHIP TIERS) ៖</b>\n\n"
         "១. <b>👑 VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ VIP) ៖</b>\n"
-        "• ចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន (១០០ មេរៀនក្នុង ១ ប្រធានបទ AI)\n"
-        "• សួរសំណួរទូទៅ និងដោះស្រាយលំហាត់ល្បឿនលឿន <b>ក្រោម ១ វិនាទី ($0 API Limit)</b>\n\n"
+        "• ចូលរៀនមេរៀន AI Masterclasses ទាំង ១,២០០ មេរៀន (១០០ មេរៀនក្នុង ១ ប្រធានបទ AI ទាំង ១២)\n"
+        "• សួរសំណួរទូទៅ និងដោះស្រាយលំហាត់ល្បឿនលឿន <b>ក្រោម ១ វិនាទី (Instant Cognitive Response)</b>\n\n"
 
         "២. <b>🌟 SUPER VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ Super VIP) ៖</b>\n"
         "• ទទួលបានអត្ថប្រយោជន៍ VIP ទាំងអស់ ១០០%\n"

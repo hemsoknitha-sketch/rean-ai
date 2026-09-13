@@ -55,6 +55,11 @@ class ReviewerAgent:
         text = re.sub(r'["”»]{2,}', '"', text)
         text = re.sub(r'["“«]\s*["”»]', '', text)
 
+        # 5b. Purge internal operational slogans (24/7 365 FREE, $0 API Limit) from user view
+        text = re.sub(r"(?i)\b24/7\s*(?:365)?\s*free\b", "", text)
+        text = re.sub(r"(?i)\b365\s*free\b", "", text)
+        text = re.sub(r"២៤/៧\s*៣៦៥\s*(?:free)?", "", text, flags=re.IGNORECASE)
+
         # 6. Remove horizontal dividers (--- or ***)
         text = re.sub(r"^\s*[\-\*_]{3,}\s*$", "", text, flags=re.MULTILINE)
 

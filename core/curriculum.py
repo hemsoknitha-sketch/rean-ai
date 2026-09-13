@@ -89,7 +89,7 @@ AI_COURSE_MODULES: Dict[str, List[str]] = {
         "Vision & Audio Multimodal API Integration",
         "Model Fine-Tuning ជាមួយទិន្នន័យ Custom JSONL",
         "Moderation API, Safety Guardrails & Streaming Control",
-        "Capstone: Enterprise Autonomous Assistant ២៤/៧"
+        "Capstone: Enterprise Autonomous Assistant កម្រិតសហគ្រាស"
     ],
     "llama": [
         "មូលដ្ឋានគ្រឹះ Open-Source LLMs & Llama 3.1/3.3 Architecture",
@@ -185,7 +185,7 @@ AI_COURSE_MODULES: Dict[str, List[str]] = {
         "Webhooks, REST APIs Integration & Payload Transformation",
         "Fault Tolerance, Error Handling & Fallback Notification Systems",
         "Flowise AI & Langflow Visual No-Code Agentic Workflows",
-        "Capstone: Autonomous 24/7 AI Business Operations System"
+        "Capstone: Autonomous Enterprise Business Operations System"
     ],
     "reasoning": [
         "មូលដ្ឋានគ្រឹះ Reasoning Models (DeepSeek-R1, OpenAI o1, o3-mini)",
