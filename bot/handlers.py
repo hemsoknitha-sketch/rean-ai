@@ -176,7 +176,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "២. <b>🌟 SUPER VIP MEMBERSHIP (អាជ្ញាប័ណ្ណ Super VIP) ៖</b>\n"
         "• ទទួលបានអត្ថប្រយោជន៍ VIP ទាំងអស់ ១០០%\n"
         "• 📖 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីននិពន្ធប្រលោមលោកខ្មែរ <b>/novel_kh</b> (APEX Khmer Novelist Engine)\n"
-        "• 🔞 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីននិពន្ធប្រលោមលោកមនោសញ្ចេតនា <b>/novel_18</b> (Queen of Romance 18+ Engine)\n"
+        "• 💡 បើកសិទ្ធិប្រើប្រាស់ម៉ាស៊ីនបង្កើត Master Prompts <b>/master_prompt</b> (AGI Genesis Engine)\n"
         "• ទទួលបានសិទ្ធិអាទិភាពខ្ពស់បំផុត (Priority Processing) គ្មានថ្ងៃទើរ Quota ឡើយ!\n\n"
         "📩 <b>ទាក់ទងជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ ៖</b>\n"
         f"សូមផ្ញើលេខ Telegram ID <code>{user.id}</code> ទៅកាន់ Admin ៖\n"
@@ -563,7 +563,7 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         text = (
             "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
-            "មុខងារពិសេស (APEX Khmer Novelist & Queen of Romance 18+ Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
+            "មុខងារពិសេស (APEX Khmer Novelist Grandmaster Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
             f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
             f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
             "👑 <b>កម្រិតអាជ្ញាប័ណ្ណបច្ចុប្បន្ន ៖</b> VIP User (សមាជិក VIP ធម្មតា)\n\n"
@@ -641,46 +641,39 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles /novel_18+ command. Restricted exclusively to Super VIP members."""
+    """Handles /novel_18 command. Strictly restricted to ADMIN ONLY; completely hidden from normal users."""
     user = update.effective_user
     chat_id = update.effective_chat.id
 
-    # Super VIP Gatekeeping Check
-    if not VIPManager.is_super_vip(user.id):
-        text = (
-            "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
-            "មុខងារពិសេស (APEX Khmer Novelist & Queen of Romance 18+ Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
-            f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
-            f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
-            "👑 <b>កម្រិតអាជ្ញាប័ណ្ណបច្ចុប្បន្ន ៖</b> VIP User (សមាជិក VIP ធម្មតា)\n\n"
-            "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
-            "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
-            "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
-        )
+    # 1. Strict Admin Gatekeeper: Mask command completely from non-admin users
+    if not is_admin(user.id):
+        # Absolutely zero disclosure: act as if the command does not exist
         if update.callback_query:
-            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
+            await update.callback_query.message.reply_text("❌ មិនមានបញ្ជា (Command) នេះឡើយ។ សូមចុច /help ដើម្បីមើលបញ្ជីមុខងារ។", parse_mode=ParseMode.HTML)
         else:
-            await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+            await update.message.reply_text("❌ មិនមានបញ្ជា (Command) នេះឡើយ។ សូមចុច /help ដើម្បីមើលបញ្ជីមុខងារ។", parse_mode=ParseMode.HTML)
         return
 
-
-    # Super VIP User Executing /novel_18+
+    # 2. Super Smart Admin Console
     if not context.args:
         text = (
-            "🔞 <b>QUEEN OF ROMANCE 18+ NOVELIST ENGINE</b>\n"
+            "⚡ <b>SUPER SMART NOVEL 18+ ENGINE (ADMIN SECRET CONSOLE)</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━\n"
-            "✨ Welcome Super VIP Master! To write an elite 18+ Khmer romance novel chapter, type:\n\n"
-            "<code>/novel_18+ [HEAT_LEVEL 1-5] [Plot Context] [Characters]</code>\n\n"
-            "<i>ឧទាហរណ៍ ៖</i>\n"
-            "<code>/novel_18+ 4 តួប្រុសជា CEO ត្រជាក់ តួស្រីជាលេខា ជាប់ក្នុងជណ្តើរយន្តពេលភ្លើងដាច់, ជំពូកទី ១</code>\n\n"
-            "🔥 <b>HEAT LEVELS:</b>\n"
-            "• <b>Level 1 (Sweet):</b> ថើបថ្ងាស ឱប កាន់ដៃ\n"
-            "• <b>Level 2 (Warm):</b> ថើបបឺតមាត់ (Fade to black)\n"
-            "• <b>Level 3 (Sensual):</b> ឈុតរួមភេទ Sensual (Open door)\n"
-            "• <b>Level 4 (Spicy/Hot):</b> ពិពណ៌នាលម្អិតអំពីសកម្មភាពផ្លូវភេទ និងកាយវិការ\n"
-            "• <b>Level 5 (Erotic/Extra Spicy):</b> ពិពណ៌នាគ្រប់ចំណុច គ្មានដែនកំណត់\n"
+            "👑 <b>សូមស្វាគមន៍ Super Admin!</b> មុខងារនេះត្រូវបានចាក់សោសម្ងាត់សម្រាប់តែ Admin ប៉ុណ្ណោះ (Users ធម្មតាមើលមិនឃើញឡើយ)។\n\n"
+            "<b>របៀបប្រើប្រាស់ (Admin Command Syntax) ៖</b>\n"
+            "<code>/novel_18 [HEAT 1-5] [ជំពូកទី N] [សាច់រឿង/តួអង្គ]</code>\n\n"
+            "<i>ឧទាហរណ៍ ជាក់ស្តែង ៖</i>\n"
+            "<code>/novel_18 4 ជំពូកទី ១ តួប្រុសជា CEO ត្រជាក់ តួស្រីជាលេខា ជាប់ក្នុងជណ្តើរយន្តពេលភ្លើងដាច់</code>\n\n"
+            "🔥 <b>កម្រិតកម្តៅ (HEAT LEVELS) ៖</b>\n"
+            "• <b>Level 1 (Sweet):</b> មនោសញ្ចេតនាផ្អែមល្ហែម កាន់ដៃ ឱប ថើបថ្ងាស\n"
+            "• <b>Level 2 (Warm):</b> ថើបបឺតមាត់យ៉ាងស្រទន់ និងក្តីស្រលាញ់ជ្រាលជ្រៅ\n"
+            "• <b>Level 3 (Sensual):</b> ឈុតស្នេហា Sensual បង្ហាញអារម្មណ៍កក់ក្តៅ និងភាពស្និទ្ធស្នាល\n"
+            "• <b>Level 4 (Spicy/Hot):</b> ពិពណ៌នាយ៉ាងលម្អិតអំពីកាយវិការ និងអារម្មណ៍រំភើបញាប់ញ័រ\n"
+            "• <b>Level 5 (Extra Spicy):</b> ពិពណ៌នាគ្រប់ឈុតឆាកមនោសញ្ចេតនាយ៉ាងស៊ីជម្រៅបំផុត\n\n"
+            "🧠 <b>សមត្ថភាព Super Smart ៖</b>\n"
+            "• <b>Auto Chapter Continuity:</b> ចងចាំសាច់រឿងឆ្លងជំពូកស្វ័យប្រវត្តិ\n"
+            "• <b>Instant Disk Cache (0.001s):</b> មិនខាត Quota API ពេលហៅជំពូកដដែល\n"
+            "• <b>Literary Grandmaster:</b> អក្សរសាស្ត្រខ្មែរផ្ចិតផ្ចង់កម្រិតខ្ពស់ គ្មាននិមិត្តសញ្ញារញ៉េរញ៉ៃ\n"
             "━━━━━━━━━━━━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -688,13 +681,13 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     prompt_details = " ".join(context.args)
 
-    # 1. Check Persistent 18+ Novel Disk Cache (0.001s Instant Response + $0 API Cost)
+    # 1. Check Persistent Novel Disk Cache (0.001s Instant Response + $0 API Cost)
     cached_novel = Novel18Cache.get(prompt_details)
     if cached_novel:
         await send_long_message(update.message, cached_novel)
         return
 
-    status_msg = await update.message.reply_text("✍️ <b>កំពុងនិពន្ធប្រលោមលោក 18+ តាមទម្រង់ Queen of Romance Engine...</b>", parse_mode=ParseMode.HTML)
+    status_msg = await update.message.reply_text("✍️ <b>កំពុងនិពន្ធប្រលោមលោកតាមទម្រង់ Super Smart Admin Engine...</b>", parse_mode=ParseMode.HTML)
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
     try:
@@ -711,7 +704,6 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
         continuity_context = NovelContinuityTracker.get_novel_context(user.id, target_chapter)
         lexicon_context = KhmerRomanceLexicon.get_lexicon_prompt_injection(heat_level)
-
 
         novel_prompt = (
             f"Write an exceptionally substantial, deeply detailed, extremely long, immersive romance novel chapter in Khmer based on these prompt details:\n"
@@ -736,13 +728,12 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             Novel18Cache.set(prompt_details, sanitized)
             NovelContinuityTracker.update_novel_state(user.id, heat_level, prompt_details, target_chapter, sanitized)
 
-
-        # Notify Admin
+        # Notify Admin (if executed from outside primary admin chat)
         try:
             await SystemMonitor.notify_admin_live_activity(
                 bot=context.bot,
                 user=user,
-                query=f"/novel_18+ {prompt_details}",
+                query=f"/novel_18 {prompt_details}",
                 response=sanitized
             )
         except Exception:
@@ -751,8 +742,8 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await send_long_message(update.message, sanitized)
 
     except Exception as err:
-        logger.error(f"18+ Romance Novelist generation failed: {err}")
-        await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក 18+ ៖ {err}", parse_mode=ParseMode.HTML)
+        logger.error(f"Super Smart Novel generation failed: {err}")
+        await update.message.reply_text(f"⚠️ កើតមានបញ្ហាក្នុងការនិពន្ធប្រលោមលោក ៖ {err}", parse_mode=ParseMode.HTML)
 
 
 async def master_prompt_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -1006,8 +997,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_query = update.message.text.strip()
     user_query = PromptInjectionGuard.sanitize_query(user_query)
 
-    # Route /novel_18+ or /Novel_18+ text commands gracefully
-    if user_query.startswith("/novel_18+") or user_query.startswith("/Novel_18+"):
+    # Route /novel_18 or /novel_18+ text commands gracefully (STRICT ADMIN ONLY)
+    if (user_query.startswith("/novel_18") or user_query.startswith("/Novel_18") or 
+        user_query.startswith("/novel18") or user_query.startswith("/Novel18")):
+        if not is_admin(user.id):
+            await update.message.reply_text("❌ មិនមានបញ្ជា (Command) នេះឡើយ។ សូមចុច /help ដើម្បីមើលបញ្ជីមុខងារ។", parse_mode=ParseMode.HTML)
+            return
         context.args = user_query.split()[1:]
         await novel_18_command(update, context)
         return
@@ -1074,19 +1069,16 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("new_user_list", new_user_list_command))
     application.add_handler(CommandHandler("newuserlist", new_user_list_command))
 
-
-
-    # Super VIP Exclusive Novelist Commands
+    # Super VIP Creative Commands
     application.add_handler(CommandHandler("novel_kh", novel_kh_command))
     application.add_handler(CommandHandler("Novel_kh", novel_kh_command))
-    application.add_handler(CommandHandler("novel_18", novel_18_command))
-    application.add_handler(CommandHandler("Novel_18", novel_18_command))
-    application.add_handler(CommandHandler("novel18", novel_18_command))
     application.add_handler(CommandHandler("master_prompt", master_prompt_command))
     application.add_handler(CommandHandler("Master_prompt", master_prompt_command))
     application.add_handler(CommandHandler("Master_Prompt", master_prompt_command))
     application.add_handler(CommandHandler("masterprompt", master_prompt_command))
 
+    # Secret Admin Only Commands (Completely hidden from users)
+    application.add_handler(CommandHandler("novel_18", novel_18_command))
     application.add_handler(CommandHandler("Novel_18", novel_18_command))
     application.add_handler(CommandHandler("novel18", novel_18_command))
     application.add_handler(CommandHandler("Novel18", novel_18_command))

@@ -20,40 +20,48 @@ class ReviewerAgent:
         if not text:
             return ""
 
-        # 1. Save code blocks (```python ... ```) -> <pre><code>...</code></pre>
+        # 1. Save code blocks (```python ... ```) -> <pre><code class="language-python">...</code></pre>
         code_blocks = []
         def save_code_block(match):
+            lang = match.group(1).strip().lower()
             code_content = html.escape(match.group(2).strip())
-            code_blocks.append(f"<pre><code>{code_content}</code></pre>")
-            return f"___CODE_BLOCK_{len(code_blocks)-1}___"
+            if lang:
+                code_blocks.append(f'<pre><code class="language-{lang}">{code_content}</code></pre>')
+            else:
+                code_blocks.append(f'<pre><code>{code_content}</code></pre>')
+            return f"@@@CODEBLOCK{len(code_blocks)-1}@@@"
 
-        text = re.sub(r"```([\w]*)\n?(.*?)```", save_code_block, text, flags=re.DOTALL)
+        text = re.sub(r"```([\w\-]*)\n?(.*?)```", save_code_block, text, flags=re.DOTALL)
 
         # 2. Save inline code (`code`)
         inline_codes = []
         def save_inline_code(match):
             code_content = html.escape(match.group(1))
             inline_codes.append(f"<code>{code_content}</code>")
-            return f"___INLINE_CODE_{len(inline_codes)-1}___"
+            return f"@@@INLINECODE{len(inline_codes)-1}@@@"
 
         text = re.sub(r"`([^`\n]+)`", save_inline_code, text)
 
         # 3. Escape HTML special characters for remaining prose
         text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
-        # Restore code blocks and inline code placeholders
-        for idx, block in enumerate(code_blocks):
-            text = text.replace(f"___CODE_BLOCK_{idx}___", block)
-        for idx, code in enumerate(inline_codes):
-            text = text.replace(f"___INLINE_CODE_{idx}___", code)
+        # 4. Super Smart Foreign Script Purge (outside code blocks)
+        # Strictly removes Chinese, Thai, Lao, Burmese, Korean, Japanese, and Cyrillic script leaks
+        foreign_scripts_pattern = r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff\u0e00-\u0e7f\u0e80-\u0eff\u1000-\u109f\uac00-\ud7af\u1100-\u11ff\u3040-\u30ff\u0400-\u04ff]"
+        text = re.sub(foreign_scripts_pattern, "", text)
 
-        # 4. Remove horizontal dividers (--- or ***)
+        # 5. Clean redundant/repetitive quote artifacts
+        text = re.sub(r'["“«]{2,}', '"', text)
+        text = re.sub(r'["”»]{2,}', '"', text)
+        text = re.sub(r'["“«]\s*["”»]', '', text)
+
+        # 6. Remove horizontal dividers (--- or ***)
         text = re.sub(r"^\s*[\-\*_]{3,}\s*$", "", text, flags=re.MULTILINE)
 
-        # 5. Format unordered list bullets FIRST (* item or - item -> • item)
+        # 7. Format unordered list bullets FIRST (* item or - item -> • item)
         text = re.sub(r"^\s*[\*\-\+]\s+", "• ", text, flags=re.MULTILINE)
 
-        # 6. Convert headers (### Header -> <b>📘 Header</b>)
+        # 8. Convert headers (### Header -> <b>📘 Header</b>)
         def format_header(match):
             title = match.group(2).strip()
             if any(ord(char) > 0x2000 for char in title[:2]):
@@ -62,21 +70,28 @@ class ReviewerAgent:
 
         text = re.sub(r"^(#{1,6})\s+(.+)$", format_header, text, flags=re.MULTILINE)
 
-        # 7. Convert bold (**bold** -> <b>bold</b>)
+        # 9. Convert bold (**bold** -> <b>bold</b>)
         text = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", text)
 
-        # 8. Convert italics (*italic* -> <i>italic</i>)
+        # 10. Convert italics (*italic* -> <i>italic</i>)
         text = re.sub(r"(?<!\*)\*([^\*\n]+)\*(?!\*)", r"<i>\1</i>", text)
         text = re.sub(r"(?<!_)_([^_\n]+)_(?!_)", r"<i>\1</i>", text)
 
-        # 9. Convert links ([title](url) -> <a href="url">title</a>)
+        # 11. Convert links ([title](url) -> <a href="url">title</a>)
         text = re.sub(r"\[([^\]]+)\]\((https?://[^)]+)\)", r'<a href="\2">\1</a>', text)
 
-        # 10. Convert blockquotes (> quote -> <i>💬 quote</i>)
+        # 12. Convert blockquotes (> quote -> <i>💬 quote</i>)
         text = re.sub(r"^\s*&gt;\s*(.+)$", r"<i>💬 \1</i>", text, flags=re.MULTILINE)
 
-        # 11. Clean up excessive consecutive blank lines
+        # 13. Clean up excessive consecutive blank lines
         text = re.sub(r"\n{3,}", "\n\n", text)
+
+        # 14. Restore protected code blocks and inline code placeholders AT THE END
+        # This guarantees code blocks remain 100% untouched and pristine
+        for idx, block in enumerate(code_blocks):
+            text = text.replace(f"@@@CODEBLOCK{idx}@@@", block)
+        for idx, code in enumerate(inline_codes):
+            text = text.replace(f"@@@INLINECODE{idx}@@@", code)
 
         return text.strip()
 

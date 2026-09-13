@@ -66,6 +66,167 @@ AI_COURSES: Dict[str, Dict[str, str]] = {
 
 
 
+AI_COURSE_MODULES: Dict[str, List[str]] = {
+    "gemini": [
+        "ស្ថាបត្យកម្ម Gemini 2.5/Flash & Native Multimodal Core",
+        "Multimodal Ingestion (រូបភាព សំឡេង វីដេអូ និងឯកសារ PDF ធំៗ)",
+        "Google AI Studio, API Key & Authentication Setup",
+        "System Instructions, Structured JSON & Schema Enforcement",
+        "Function Calling & Real-Time External Tool Integration",
+        "Grounding with Google Search & Dynamic Live Retrieval",
+        "Context Caching & Long-Context (1M-2M Tokens) Optimization",
+        "Model Tuning & Supervised Fine-Tuning លើ Google Cloud",
+        "Multi-turn Dialogue, Sessions & Memory Architecture",
+        "Capstone: Real-World Enterprise Multimodal AI System"
+    ],
+    "chatgpt": [
+        "ស្ថាបត្យកម្ម GPT-4o, GPT-4o mini & Reasoning Frontier",
+        "OpenAI API Setup, Tokenomics & Cost Efficiency",
+        "Advanced In-Context Learning & Few-Shot Engineering",
+        "Structured Outputs, JSON Mode & Pydantic Schema Validation",
+        "Function Calling, Assistants API & Code Interpreter",
+        "File Search & RAG Architecture ក្នុង OpenAI Ecosystem",
+        "Vision & Audio Multimodal API Integration",
+        "Model Fine-Tuning ជាមួយទិន្នន័យ Custom JSONL",
+        "Moderation API, Safety Guardrails & Streaming Control",
+        "Capstone: Enterprise Autonomous Assistant ២៤/៧"
+    ],
+    "llama": [
+        "មូលដ្ឋានគ្រឹះ Open-Source LLMs & Llama 3.1/3.3 Architecture",
+        "Llama Tokenizer, 128k Context Window & RoPE Mechanism",
+        "Ollama Local Deployment, Modelfiles & CLI Mastery",
+        "Model Quantization (GGUF, EXL2, AWQ, FP8) & VRAM Tuning",
+        "Local API Server (Ollama REST API, vLLM, LM Studio)",
+        "Prompt Formatting (Llama 3 Chat Templates & Special Tokens)",
+        "Function Calling & Tool Execution លើ Local Llama Models",
+        "Fine-Tuning Llama 3 ជាមួយ Unsloth & QLoRA លើ Single GPU",
+        "Private Offline RAG គ្មានការលេចធ្លាយទិន្នន័យ (Air-Gapped AI)",
+        "Capstone: Production Local AI Deployment លើ Linux VPS & Docker"
+    ],
+    "deeplearning": [
+        "គណិតវិទ្យាស្នូលសម្រាប់ AI (Linear Algebra, Calculus & Tensors)",
+        "Artificial Neural Networks (Perceptron & Activation Functions)",
+        "Loss Functions & Backpropagation (ក្បួនគណនា Gradient Descent)",
+        "Optimizers (SGD, Adam, AdamW) & Learning Rate Scheduling",
+        "Convolutional Neural Networks (CNNs) សម្រាប់ Computer Vision",
+        "Recurrent Neural Networks (RNNs, LSTMs, GRUs) សម្រាប់ Sequence",
+        "Transformer Architecture & Scaled Dot-Product Attention",
+        "PyTorch Framework ពីមូលដ្ឋានគ្រឹះរហូតដល់ Advanced Tensors",
+        "Training Pipeline, Overfitting Defenses (Dropout, LayerNorm)",
+        "Capstone: បង្កើត និង Train Deep Neural Network ពីបាតដៃទទេ"
+    ],
+    "genai": [
+        "គោលការណ៍ Latent Diffusion Models (LDMs) & Denoising Math",
+        "Stable Diffusion (SD 1.5, SDXL, Flux.1) Architecture",
+        "Midjourney Master Prompting (Lighting, Camera, Aspect Ratio)",
+        "ComfyUI Modular Node Architecture & Workflow Design",
+        "ControlNet (Pose, Canny Edge, Depth, Scribble) Integration",
+        "LoRA (Low-Rank Adaptation) Training សម្រាប់រូបភាពផ្ទាល់ខ្លួន",
+        "Image-to-Image, Inpainting & Outpainting Techniques",
+        "Latent Upscaling, Face Restoration & Image Enhancement",
+        "Text-to-Image APIs Integration (Replicate, Fal.ai, Together)",
+        "Capstone: Automated AI Generative Media Production Suite"
+    ],
+    "agents": [
+        "មូលដ្ឋានគ្រឹះ Autonomous AI Agents & ReAct Framework",
+        "Agent Cognitive Engine (Perception, Planning, Memory, Tools)",
+        "LangChain & LangGraph State Machine Architectures",
+        "Multi-Agent Swarms & Collaborative Workflows (CrewAI, AutoGen)",
+        "Dynamic Tool Calling & External APIs Execution សម្រាប់ Agents",
+        "Hierarchical Memory (Short-Term, Long-Term & Vector Memory)",
+        "Autonomous Coding Agents (Code Generation, Testing & Self-Healing)",
+        "Human-in-the-Loop & Execution Safety Guardrails",
+        "Autonomous Web Browsing & Dynamic Scraping Agents",
+        "Capstone: Full-Stack Autonomous Software Engineering Agent"
+    ],
+    "prompting": [
+        "គ្រឹះរឹងមាំនៃ Prompt Engineering & Attention Steering",
+        "Zero-Shot vs Few-Shot In-Context Learning Strategies",
+        "Chain-of-Thought (CoT), Step-Back & Tree-of-Thoughts Logic",
+        "Structured System Prompts (Personas, Rules, XML Delimiters)",
+        "Output Formatting (Strict JSON, YAML & Markdown Schemas)",
+        "Adversarial Prompting & Jailbreak Defense Methodologies",
+        "Dynamic Prompt Injection Defenses & Input Sanitization",
+        "Meta-Prompting (ការប្រើ AI បង្កើត និង Optimize Prompts ស្វ័យប្រវត្តិ)",
+        "QLoRA & Dataset Formatting សម្រាប់ Supervised Fine-Tuning",
+        "Capstone: Production Enterprise Master Prompt Architecture Suite"
+    ],
+    "rag": [
+        "គ្រឹះនៃ RAG (Retrieval-Augmented Generation) & Hallucination Defenses",
+        "Document Chunking Strategies (Fixed, Recursive, Semantic Chunking)",
+        "Vector Embeddings (OpenAI, BGE, Nomic) & Dimensionality",
+        "Vector Databases Setup (Pinecone, ChromaDB, Qdrant, Milvus)",
+        "Similarity Metrics (Cosine Similarity, Dot Product, Euclidean)",
+        "Hybrid Search (Dense Vector + Sparse BM25) & Re-Ranking (Cohere)",
+        "Metadata Filtering & Multi-Tenant Knowledge Bases",
+        "Advanced RAG (Query Decomposition, HyDE, Multi-Query)",
+        "RAG Evaluation Metrics (RAGAS: Faithfulness, Answer Relevance)",
+        "Capstone: Private Enterprise Document Intelligence RAG Engine"
+    ],
+    "aivideo": [
+        "ស្ថាបត្យកម្ម AI Video Generation (Sora, Runway Gen-3, Kling AI)",
+        "Cinematic Text-to-Video Prompting (Camera Motions, Angles, Lighting)",
+        "Image-to-Video Animation & First/Last Frame Consistency",
+        "AI Voice Synthesis & Voice Cloning ជាមួយ ElevenLabs",
+        "AI Lip-Syncing & Talking Avatars (HeyGen, LivePortrait)",
+        "Motion Brush, Camera Pathing & Video Physics Control",
+        "AI Sound Effects & Cinematic Background Music (Suno, Udio)",
+        "Video Super-Resolution Upscaling & Frame Interpolation (RIFE)",
+        "Automated Video Processing Pipelines ជាមួយ Python & FFmpeg",
+        "Capstone: Automated Faceless Video Channel Production Suite"
+    ],
+    "automation": [
+        "គោលការណ៍ AI Automation & No-Code/Low-Code Architecture",
+        "n8n Self-Hosted Setup & Workflow Orchestration",
+        "Make.com Scenarios, Webhook Triggers & Router Logic",
+        "តភ្ជាប់ Telegram Bot ជាមួយ AI & Google Sheets ដោយស្វ័យប្រវត្តិ",
+        "Automated Customer Support Workflows (Gmail, Telegram, Zendesk)",
+        "Social Media Content Generation & Multi-Platform Scheduling",
+        "Webhooks, REST APIs Integration & Payload Transformation",
+        "Fault Tolerance, Error Handling & Fallback Notification Systems",
+        "Flowise AI & Langflow Visual No-Code Agentic Workflows",
+        "Capstone: Autonomous 24/7 AI Business Operations System"
+    ],
+    "reasoning": [
+        "មូលដ្ឋានគ្រឹះ Reasoning Models (DeepSeek-R1, OpenAI o1, o3-mini)",
+        "Test-Time Compute (TTC) & Internal Hidden Reasoning Traces",
+        "Reinforcement Learning (RLHF, RLAIF, GRPO) សម្រាប់ Reasoning",
+        "Step-by-Step Verification, Self-Correction & Backtracking",
+        "Solving Complex Mathematical & Algorithmic Problems",
+        "Deep Research Workflows & Autonomous Multi-Source Synthesis",
+        "Prompting Reasoning Models (Zero-Shot CoT vs Traditional LLMs)",
+        "Latency vs Accuracy Trade-offs & Tokenomics នៃ Reasoning",
+        "Error Analysis, Hallucination Verification & Fact-Checking",
+        "Capstone: Autonomous Deep Research & Technical Synthesis Node"
+    ],
+    "security": [
+        "ទិដ្ឋភាពទូទៅនៃ AI Security & OWASP Top 10 for LLMs",
+        "Prompt Injection Attacks (Direct, Indirect & Jailbreaking)",
+        "Training Data Extraction, Membership Inference & Model Stealing",
+        "Sensitive Data Protection & PII Redaction Guardrails",
+        "System Prompt Leakage Defenses & Canary Tokens",
+        "Input/Output Guardrail Frameworks (NeMo Guardrails, Llama Guard)",
+        "Adversarial Robustness Testing & Automated Red Teaming",
+        "Denial of Service (DoS) & Resource Exhaustion Defenses",
+        "Secure AI Integration: IAM, API Key Vaults & Sandboxing",
+        "Capstone: Fortress-Grade Enterprise AI Defense Architecture"
+    ]
+}
+
+LESSON_SUBTOPICS: List[str] = [
+    "មូលដ្ឋានគ្រឹះគន្លឹះ និងគោលការណ៍ស្នូល (Fundamental Concepts & Core Principles)",
+    "ស្ថាបត្យកម្ម និងរបៀបដំណើរការស៊ីជម្រៅ (Architecture & Deep Mechanism)",
+    "ការដំឡើង និងការកំណត់រចនាសម្ព័ន្ធបច្ចេកទេស (Setup & Technical Configuration)",
+    "បច្ចេកទេសអនុវត្តកម្រិតខ្ពស់ (Advanced Implementation Techniques)",
+    "ការដោះស្រាយបញ្ហា និងកំហុសទូទៅ (Debugging & Common Error Pitfalls)",
+    "គំរូកូដ និងការសាកល្បងជាក់ស្តែង (Hands-on Code & Practical Experiment)",
+    "ការបង្កើនល្បឿន និងប្រសិទ្ធភាពចំណាយ (Performance & Cost Optimization)",
+    "ស្តង់ដារសុវត្ថិភាព និង Best Practices (Security & Production Best Practices)",
+    "ការតភ្ជាប់ជាមួយប្រព័ន្ធខាងក្រៅ (Integration & Real-world Workflows)",
+    "គម្រោងអនុវត្តសង្ខេបជំពូក និង Capstone Lab (Module Mastery & Capstone Lab)"
+]
+
+
 class CurriculumEngine:
     """Generates structured 100-lesson curriculums dynamically for any AI course."""
 
@@ -76,51 +237,66 @@ class CurriculumEngine:
 
     @staticmethod
     def get_lesson_title(course_key: str, lesson_num: int, lang: str = "km") -> str:
-        """Generates structured lesson title for any lesson number from 1 to 100."""
-        course_info = AI_COURSES.get(course_key, AI_COURSES["gemini"])
-        course_name = course_info["title"]
-        
+        """Generates structured unique lesson title for any lesson number from 1 to 100."""
         # Categorize into 10 modules (10 lessons each)
-        module_num = (lesson_num - 1) // 10 + 1
-        
-        modules_km = [
-            "មូលដ្ឋានគ្រឹះ និងស្ថាបត្យកម្ម (Foundations & Architecture)",
-            "បច្ចេកទេសសរសេរ Prompt កម្រិតខ្ពស់ (Advanced Prompt Engineering)",
-            "ការទាញយក និងបកប្រែទិន្នន័យ Multimodal (Multimodal Data Processing)",
-            "ការភ្ជាប់ API និងរៀបចំ System Config (API Integration & Config)",
-            "ការប្រើប្រាស់ Tools និង Function Calling (Tools & Function Calling)",
-            "ប្រព័ន្ធចងចាំ និង State Management (Memory & Context Windows)",
-            "ការបង្កើត Autonomous Agents (Building AI Agents)",
-            "ការ Fine-Tune ម៉ូឌែលផ្ទាល់ខ្លួន (Model Fine-Tuning & QLoRA)",
-            "ការដាក់ឱ្យប្រើប្រាស់លើ Cloud ២៤/៧ (Cloud Deployment & Scaling)",
-            "គម្រោងអនុវត្តជាក់ស្តែង និង Master Certification (Capstone Real Projects)"
-        ]
-        
-        module_name = modules_km[module_num - 1]
-        sub_lesson = ((lesson_num - 1) % 10) + 1
-        
+        module_num = max(1, min(10, (lesson_num - 1) // 10 + 1))
+        sub_lesson = max(1, min(10, ((lesson_num - 1) % 10) + 1))
+
+        course_modules = AI_COURSE_MODULES.get(course_key, AI_COURSE_MODULES["gemini"])
+        module_name = course_modules[module_num - 1]
+        sub_topic = LESSON_SUBTOPICS[sub_lesson - 1]
+
         if lang == "km":
-            return f"មេរៀនទី {lesson_num} (ជំពូកទី {module_num}៖ {module_name} - ផ្នែក {sub_lesson})"
-        return f"Lesson {lesson_num} (Module {module_num}: {module_name} - Part {sub_lesson})"
+            return f"មេរៀនទី {lesson_num} (ជំពូកទី {module_num}៖ {module_name} - {sub_topic})"
+        return f"Lesson {lesson_num} (Module {module_num}: {module_name} - {sub_topic})"
 
     @staticmethod
     def generate_lesson_prompt(course_key: str, lesson_num: int, lang: str = "km") -> str:
-        """Generates detailed prompt for Architect agent to deliver a 100% complete lesson without shortcuts."""
+        """Generates detailed prompt for Architect agent to deliver an elite 3000-3500 character masterclass."""
         course_info = AI_COURSES.get(course_key, AI_COURSES["gemini"])
         course_title = course_info["title"]
         lesson_title = CurriculumEngine.get_lesson_title(course_key, lesson_num, lang)
-        
+
         prompt = (
-            f"You are the Supreme Polymath AI Grandmaster delivering an elite, 100% complete masterclass tutorial.\n\n"
+            f"You are the Supreme Polymath AI Grandmaster delivering an elite, masterclass tutorial.\n\n"
             f"Course: {course_title}\n"
-            f"Target Lesson: {lesson_title}\n"
-            f"Language Requested: {'Khmer (ភាសាខ្មែរ)' if lang == 'km' else 'English'}\n\n"
-            f"STRICT PEDAGOGICAL & FORMATTING REQUIREMENTS:\n"
-            f"1. **Deep Pedagogical Intuition**: Explain the lesson from First-Principles Thinking. Teach the *why* before the *how*. Make complex concepts crystal clear with real-world analogies.\n"
-            f"2. **Pristine Visual Structure**: Structure the response with clear numbered sections (១. , ២. , ៣. ), bullet points (•), bold section headers, and relevant emojis.\n"
-            f"3. **Zero Clutter**: Do NOT output raw Markdown symbols like `###` or loose `**`. Keep the text beautifully formatted and readable.\n"
-            f"4. **Practical Code & Examples**: Provide complete, working code blocks or step-by-step prompt examples where applicable.\n"
-            f"5. **Interactive Summary**: End with a Socratic Thought Question and an invitation to click 'មេរៀនបន្ទាប់ ▶' for Lesson {lesson_num + 1}."
+            f"Target Lesson: {lesson_title}\n\n"
+            f"STRICT LANGUAGE PURITY MANDATE:\n"
+            f"1. You MUST use 100% full, rich, natural Khmer language adhering to the Samdech Chuon Nath Dictionary for all explanations, descriptions, and pedagogical guidance.\n"
+            f"2. You are ONLY permitted to attach technical terms in English inside parentheses right after their Khmer equivalents, e.g. 'គំរូភាសាធំៗ (Large Language Models)', 'មូលដ្ឋានទិន្នន័យវ៉ិចទ័រ (Vector Databases)'.\n"
+            f"3. ABSOLUTELY NO OTHER FOREIGN LANGUAGES ALLOWED. Eradicate 100% of foreign words: ZERO Chinese characters (中文), ZERO Thai characters (ไทย), ZERO Vietnamese characters, ZERO French, etc. Any presence of foreign characters outside code blocks is strictly prohibited.\n\n"
+            f"ANTI-REPETITION & ZERO CLICHÉ MANDATE:\n"
+            f"1. Absolutely NO repeated quotes or generic clichés across lessons (e.g. never use canned quotes like 'នៅក្នុងយុគសម័យឌីជីថល...', 'ចំណេះដឹងគឺជា...', 'នៅក្នុងសម័យកាលបច្ចេកវិទ្យា...').\n"
+            f"2. Every lesson MUST have its own fresh, original, highly specific First-Principles deconstruction tailored strictly to '{lesson_title}'.\n"
+            f"3. Never output generic boilerplate or filler phrases. Maintain dense, high-value technical instruction from the very first line.\n\n"
+            f"LENGTH MANDATE:\n"
+            f"- TARGET LENGTH: You MUST generate a comprehensive, highly detailed lesson between 3,000 and 3,500 characters in length.\n"
+            f"- No rushed summaries, no abbreviations, no omitted steps, and zero placeholder comments (never use '# TODO' or '# Add code here').\n\n"
+            f"THE 6-PILLAR GRANDMASTER CURRICULUM ARCHITECTURE:\n"
+            f"Organize your entire lesson strictly using the following 6 numbered sections:\n\n"
+            f"១. សេចក្តីផ្តើម និងគោលបំណងស្នូល (Overview & Core Objectives):\n"
+            f"• បង្ហាញចំណងជើងមេរៀន គោលដៅជាក់លាក់ និងអ្វីដែលអ្នករៀននឹងទទួលបាន ១០០% បន្ទាប់ពីបញ្ចប់មេរៀននេះ។ ចូលត្រង់ប្រធានបទភ្លាម គ្មានពាក្យ Quotes ឬពាក្យផ្តើមច្រំដែលឡើយ។\n\n"
+            f"២. មូលដ្ឋានគ្រឹះ និងទ្រឹស្តីបំបែកពីបាតដៃទទេ (First-Principles Intuition):\n"
+            f"• ពន្យល់ 'ហេតុអ្វី (Why)' មុន 'យ៉ាងដូចម្តេច (How)'។\n"
+            f"• បំបែកគំនិតស្មុគស្មាញឱ្យទៅជាភាសាខ្មែរធម្មជាតិងាយយល់បំផុត ដោយប្រើការប្រៀបធៀបក្នុងជីវិតរស់នៅជាក់ស្តែង (Real-world Analogy) ថ្មីស្រឡាង ធានាថាអ្នកចាប់ផ្តើមដំបូងយល់ចេញច្បាស់លាស់ដាច់ខាត។\n\n"
+            f"៣. ការណែនាំឧបករណ៍ទំនើប និងការដំឡើងបរិស្ថាន (Modern Tools & Setup Guide):\n"
+            f"• ណែនាំឧបករណ៍ ឬបណ្ណាល័យបច្ចេកវិទ្យា AI ទាន់សម័យ (ដូចជា Google AI Studio, Python venv, Gemini API, OpenAI API, Ollama, LangChain, n8n, etc.)។\n"
+            f"• បង្ហាញជំហានដំឡើងច្បាស់លាស់ មួយជំហានម្តងៗ (Step-by-step Setup) ជាមួយ Command ឬ URL ផ្លូវការ។\n\n"
+            f"៤. គន្លឹះ និងរូបមន្តសរសេរ Prompt កម្រិតវិជ្ជាជីវៈ (Professional Prompt Engineering Blueprint):\n"
+            f"• ពន្យល់ពីគន្លឹះសរសេរ Prompt ឱ្យចេញលទ្ធផលត្រឹមត្រូវបំផុត (Role, Context, Task, Delimiters, Few-shot Examples, Constraints)។\n"
+            f"• ផ្តល់គំរូ Prompt ជាក់ស្តែងដែលរៀបចំទុកជាមុន ងាយស្រួល Copy យកទៅប្រើភ្លាមៗ។\n\n"
+            f"៥. កូដគំរូ និង Prompt ជាក់ស្តែង Copiedable Super Smart (Complete Ready-to-Run Code & Prompts):\n"
+            f"• ផ្តល់កូដពេញលេញ 100% (Working Python/JS/Bash script) ក្នុង code block (```python ... ```) ដែលអាច Copy យកទៅ Run បានភ្លាមដោយគ្មាន Error។\n"
+            f"• ផ្តល់ Master Prompt គំរូពេញលេញក្នុង code block (```yaml ... ``` ឬ ```markdown ... ```) សម្រាប់អ្នករៀនយកទៅ Paste ក្នុង ChatGPT, Gemini, ឬ Claude បានភ្លាម។\n\n"
+            f"៦. ការអនុវត្តជាក់ស្តែង និងសំណួរឆ្លុះបញ្ចាំង (Hands-on Lab & Socratic Reflection):\n"
+            f"• លំហាត់អនុវត្តខ្នាតតូចសម្រាប់អ្នករៀនសាកល្បងដោយខ្លួនឯង។\n"
+            f"• សំណួរគិតពិចារណា (Socratic Question) ដើម្បីពង្រឹងការយល់ដឹងស៊ីជម្រៅ។\n"
+            f"• ការណែនាំឱ្យចុចប៊ូតុង '📖 មេរៀនបន្ទាប់ ▶' សម្រាប់មេរៀនទី {min(100, lesson_num + 1)}។\n\n"
+            f"FORMATTING & AESTHETIC DIRECTIVES:\n"
+            f"- Use numbered sections (១. , ២. , ៣. ), bullet points (•), and relevant emojis (🔮, 🚀, 💡, ⚙️, 📋, 🎯).\n"
+            f"- Avoid excessive loose asterisks or raw markdown hash tags (`###`).\n"
+            f"- Adhere strictly to the Khmer grammar and vocabulary of Samdech Sangha Raja Chuon Nath Dictionary."
         )
         return prompt
+
 

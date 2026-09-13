@@ -24,7 +24,6 @@ async def post_init(application: Application) -> None:
         BotCommand("start", "🚀 ចាប់ផ្តើម និងពិនិត្យគណនី (Start & Account)"),
         BotCommand("ai", "🎓 បើកបញ្ជី AI Courses (100 Lessons per AI)"),
         BotCommand("novel_kh", "📖 និពន្ធប្រលោមលោកខ្មែរ (APEX Novelist)"),
-        BotCommand("novel_18", "🔞 និពន្ធប្រលោមលោក 18+ (Romance 18+ Engine)"),
         BotCommand("master_prompt", "💡 បង្កើត English Master Prompt (AGI Genesis)"),
         BotCommand("reset", "🔄 លុបប្រវត្តិសន្ទនា (Reset Thread Memory)"),
         BotCommand("help", "💡 មើលការណែនាំ និងស្ថាបត្យកម្ម (Help & Specs)"),
@@ -37,7 +36,7 @@ async def post_init(application: Application) -> None:
             BotCommand("start", "🚀 Start & Re-initialize Dialogue"),
             BotCommand("ai", "🎓 AI Master Courses (100 Lessons per Topic)"),
             BotCommand("novel_kh", "📖 APEX Khmer Novelist Engine"),
-            BotCommand("novel_18", "🔞 Queen of Romance 18+ Engine"),
+            BotCommand("novel_18", "⚡ Super Smart Novel 18+ (Admin Secret Engine)"),
             BotCommand("master_prompt", "💡 AGI Prompt Genesis Node (Master Prompt)"),
 
             BotCommand("admin", "🎛️ Super Admin Control Panel"),
