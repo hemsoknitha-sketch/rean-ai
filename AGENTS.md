@@ -122,17 +122,15 @@ Every lesson must strictly follow the 6 numbered sections:
 
 ### B. Permanent VPS Update Command Mandate
 - In every response where code is created or modified, the agent **MUST ALWAYS** provide the user with the exact, copyable 1-click command line to synchronize and update the Google Cloud VPS, without requiring the user to request it again:
-  - **Option 1 (Direct 1-Click with sudo for standard user)**:
+  - **Option 1 (Direct 1-Click for user `hemsoknitha` on `polymath-bot-vm`)**:
     ```bash
-    sudo bash -c "cd /root/rean-ai && git pull origin main && python3 scripts/audit_system.py && systemctl restart rean-ai"
+    cd /home/hemsoknitha/rean-ai && git pull origin main && chmod +x scripts/update_vps.sh && ./scripts/update_vps.sh
     ```
-    *(or if located in user home: `cd ~/rean-ai && git pull origin main && python3 scripts/audit_system.py && sudo systemctl restart rean-ai`)*
-  - **Option 2 (Switching to Root first)**:
+  - **Option 2 (When in Root Shell)**:
     ```bash
-    sudo su
-    cd /root/rean-ai && git pull origin main && python3 scripts/audit_system.py && systemctl restart rean-ai
+    cd /home/hemsoknitha/rean-ai && git pull origin main && chmod +x scripts/update_vps.sh && ./scripts/update_vps.sh
     ```
-  - *(Or via script inside repo: `./scripts/update_vps.sh`)*
+  - *(Direct Audit Test: `.venv/bin/python scripts/audit_system.py`)*
 - **Continuous Memory**: This directive is permanently active across all current and future conversation turns, system reboots, or agent restarts. No further reminders from the user are required.
 
 ---
