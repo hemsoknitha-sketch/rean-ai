@@ -110,5 +110,23 @@ Every lesson must strictly follow the 6 numbered sections:
 - **Mathematical Accuracy**:
   - Deep Learning, Computer Science, and Data Analytics explanations must be mathematically grounded (exact formulations for Loss, Gradients, Tensors, Matrix Multiplication, and Attention Weights).
 
+
+---
+
+## 6. MANDATORY REPOSITORY SYNCHRONIZATION & GOOGLE CLOUD VPS DEPLOYMENT PROTOCOL (IMMUTABLE)
+
+### A. Automatic Git Push on Every Code Modification
+- **Mandatory Git Push**: Every single modification, patch, optimization, or feature update executed in the codebase MUST be committed and pushed immediately to GitHub (`origin main`).
+- **Google Cloud VPS Source of Truth**: The GitHub remote repository (`origin main`) serves as the active deployment source for the Google Cloud VPS. Unpushed local changes are strictly prohibited from lingering.
+- **Pre-Push Validation**: Before pushing, all changes must pass the internal audit test (`python scripts/audit_system.py`) with a 100% PASS rate to guarantee zero downtime and prevent any deployment breakage on the VPS.
+
+### B. Permanent VPS Update Command Mandate
+- In every response where code is created or modified, the agent **MUST ALWAYS** provide the user with the exact, copyable 1-click command line to synchronize and update the Google Cloud VPS, without requiring the user to request it again:
+  ```bash
+  cd /root/rean-ai && git pull origin main && python3 scripts/audit_system.py && sudo systemctl restart rean-ai
+  ```
+  *(or `./scripts/update_vps.sh`)*
+- **Continuous Memory**: This directive is permanently active across all current and future conversation turns, system reboots, or agent restarts. No further reminders from the user are required.
+
 ---
 *Charter Established: 2026-09-13 | Supreme Polymath AI Architecture | REAN AI*
