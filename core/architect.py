@@ -219,7 +219,8 @@ class ArchitectAgent:
                 None,
                 self._call_gemini_sync,
                 full_prompt,
-                needs_search
+                needs_search,
+                is_lesson_req
             )
             if response and not user_state.history:
                 self.cache.set(user_query, intent.language_hint, response)
@@ -245,12 +246,13 @@ class ArchitectAgent:
                 "Please re-submit your query momentarily as the Grandmaster re-establishes context."
             )
 
-    def _call_gemini_sync(self, full_prompt: str, needs_search: bool = False) -> str:
+    def _call_gemini_sync(self, full_prompt: str, needs_search: bool = False, is_lesson: bool = False) -> str:
         """Synchronous wrapper for Gemini API client generate_content call with model fallback support."""
         tools = []
         if Config.ENABLE_SEARCH_GROUNDING and needs_search:
             tools.append({"google_search": {}})
-        if Config.ENABLE_CODE_EXECUTION:
+        # Disable code_execution sandbox for educational lessons to eliminate AFC overhead and latency
+        if Config.ENABLE_CODE_EXECUTION and not is_lesson:
             tools.append({"code_execution": {}})
 
         config = types.GenerateContentConfig(
@@ -261,7 +263,7 @@ class ArchitectAgent:
         )
 
         # Candidate fallback models if primary model hits rate limits or quota
-        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-flash-latest"]
         last_exception = None
 
         for m_name in candidate_models:
