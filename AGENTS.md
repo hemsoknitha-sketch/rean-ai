@@ -133,7 +133,7 @@ Every lesson must strictly follow the 6 numbered sections:
 - In every response where code is created or modified, the agent **MUST ALWAYS** provide the user with the exact, copyable 1-click command line to synchronize and update the Google Cloud VPS, without requiring the user to request it again:
   - **Option 1 (Direct 1-Click for user `hemsoknitha` on `polymath-bot-vm`)**:
     ```bash
-    cd /home/hemsoknitha/rean-ai && git pull origin main && chmod +x scripts/update_vps.sh && ./scripts/update_vps.sh
+    sudo chown -R $(whoami):$(whoami) /home/hemsoknitha/rean-ai && cd /home/hemsoknitha/rean-ai && git pull origin main && chmod +x scripts/update_vps.sh && ./scripts/update_vps.sh
     ```
   - **Option 2 (When in Root Shell)**:
     ```bash

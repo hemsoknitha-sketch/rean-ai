@@ -25,6 +25,11 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${PROJECT_ROOT}"
 echo -e "${GREEN}📂 Working Directory:${NC} ${PROJECT_ROOT}"
 
+# Self-heal permissions for .git repository
+if [ -d "${PROJECT_ROOT}/.git" ]; then
+    chmod -R u+rwX "${PROJECT_ROOT}/.git" 2>/dev/null || true
+fi
+
 # 2. Synchronize with GitHub Origin Main
 echo -e "\n${YELLOW}📥 Pulling latest updates from origin/main...${NC}"
 git fetch origin main
@@ -120,6 +125,11 @@ if [ "$RESTARTED" = false ]; then
     else
         echo -e "${RED}⚠️ Warning: Bot process could not be confirmed. Check ${PROJECT_ROOT}/rean_ai.log${NC}"
     fi
+fi
+
+# Restore ownership if executed under sudo
+if [ "$(whoami)" = "root" ] && [ -n "$SUDO_USER" ]; then
+    chown -R "${SUDO_USER}:${SUDO_USER}" "${PROJECT_ROOT}" 2>/dev/null || true
 fi
 
 echo -e "\n${GREEN}🎉 GOOGLE CLOUD VPS UPDATE COMPLETE & ACTIVE!${NC}"
