@@ -246,6 +246,26 @@ class ArchitectAgent:
                 "Please re-submit your query momentarily as the Grandmaster re-establishes context."
             )
 
+    def _get_fallback_candidates(self) -> list[str]:
+        """Returns ordered list of resilient candidate models available in 2026."""
+        primary_order = [
+            self.model_name,
+            "gemini-flash-latest",
+            "gemini-3.7-flash",
+            "gemini-3.5-flash",
+            "gemini-flash-lite-latest",
+            "gemini-3.1-flash-lite",
+            "gemini-3.8-flash",
+            "gemini-3-flash-preview",
+            "gemini-3.5-flash-lite",
+            "gemini-3.6-flash"
+        ]
+        candidates = []
+        for m in primary_order:
+            if m and m not in candidates:
+                candidates.append(m)
+        return candidates
+
     def _call_gemini_sync(self, full_prompt: str, needs_search: bool = False, is_lesson: bool = False) -> str:
         """Synchronous wrapper for Gemini API client generate_content call with model fallback support."""
         tools = []
@@ -262,8 +282,7 @@ class ArchitectAgent:
             tools=tools if tools else None,
         )
 
-        # Candidate fallback models if primary model hits rate limits or quota
-        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-flash-latest"]
+        candidate_models = self._get_fallback_candidates()
         last_exception = None
 
         for m_name in candidate_models:
@@ -278,6 +297,8 @@ class ArchitectAgent:
             except Exception as e:
                 last_exception = e
                 logger.warning(f"Model '{m_name}' execution attempt failed: {e}. Trying fallback candidate...")
+                import time
+                time.sleep(0.5)
 
         if last_exception:
             raise last_exception
@@ -308,7 +329,7 @@ class ArchitectAgent:
             max_output_tokens=8192,
         )
 
-        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        candidate_models = self._get_fallback_candidates()
         last_exception = None
 
         for m_name in candidate_models:
@@ -323,6 +344,8 @@ class ArchitectAgent:
             except Exception as e:
                 last_exception = e
                 logger.warning(f"Novel model '{m_name}' attempt failed: {e}. Trying fallback...")
+                import time
+                time.sleep(0.5)
 
         if last_exception:
             raise last_exception
@@ -353,8 +376,7 @@ class ArchitectAgent:
             max_output_tokens=8192,
         )
 
-
-        candidate_models = [self.model_name, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+        candidate_models = self._get_fallback_candidates()
         last_exception = None
 
         for m_name in candidate_models:
@@ -369,6 +391,8 @@ class ArchitectAgent:
             except Exception as e:
                 last_exception = e
                 logger.warning(f"18+ Novel model '{m_name}' attempt failed: {e}. Trying fallback...")
+                import time
+                time.sleep(0.5)
 
         if last_exception:
             raise last_exception

@@ -77,11 +77,22 @@ async def pregenerate_lesson(
         sanitized = reviewer_agent.validate_and_sanitize(text=raw_response, strict=Config.ZERO_MARKDOWN_STRICT)
         sanitized = ReviewerAgent.balance_html_tags(sanitized)
 
-        if not sanitized or len(sanitized.strip()) < 100:
-            logger.error(f"  [FAIL] Generated lesson too short for {course_key}:{lesson_num}")
+        if not sanitized or len(sanitized.strip()) < 1000:
+            logger.error(f"  [FAIL] Generated lesson too short for {course_key}:{lesson_num} ({len(sanitized) if sanitized else 0} chars)")
             return False
 
-        LessonCache.set(course_key, lesson_num, cache_key, sanitized)
+        if "<pre><code" not in sanitized:
+            logger.error(f"  [FAIL] Missing copyable code block in lesson for {course_key}:{lesson_num}")
+            return False
+
+        if any(err in sanitized for err in ["Polymath Cognitive Engine encountered", "RESOURCE_EXHAUSTED", "Rate Limit", "Authentication Error", "Service Unavailable", "UNAVAILABLE"]):
+            logger.error(f"  [FAIL] Detected error message instead of masterclass lesson for {course_key}:{lesson_num}")
+            return False
+
+        saved = LessonCache.set(course_key, lesson_num, cache_key, sanitized)
+        if not saved:
+            return False
+
         logger.info(f"  [SUCCESS] Pre-generated and cached {course_key.upper()} មេរៀនទី {lesson_num} ({len(sanitized)} chars).")
         return True
 
@@ -133,16 +144,24 @@ async def run_batch_pregeneration(
                     print(f"[{completed}/{total_tasks} - {progress:.1f}%] [SKIP] {course_key} #{lesson_num} ({mode}) - Already cached.")
                     continue
 
-                success = await pregenerate_lesson(
-                    course_key=course_key,
-                    lesson_num=lesson_num,
-                    mode=mode,
-                    architect_agent=architect_agent,
-                    evaluator_agent=evaluator_agent,
-                    reviewer_agent=reviewer_agent,
-                    state_manager=state_manager,
-                    force=force
-                )
+                # Retry loop up to 3 attempts with progressive delay if transient error occurs
+                success = False
+                for attempt in range(1, 4):
+                    success = await pregenerate_lesson(
+                        course_key=course_key,
+                        lesson_num=lesson_num,
+                        mode=mode,
+                        architect_agent=architect_agent,
+                        evaluator_agent=evaluator_agent,
+                        reviewer_agent=reviewer_agent,
+                        state_manager=state_manager,
+                        force=force
+                    )
+                    if success:
+                        break
+                    wait_sec = 10 * attempt
+                    print(f"  ⚠️ [RETRY {attempt}/3] Re-attempting {course_key} #{lesson_num} ({mode}) after {wait_sec}s delay...")
+                    await asyncio.sleep(wait_sec)
 
                 if success:
                     success_count += 1
