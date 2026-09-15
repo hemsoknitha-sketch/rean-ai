@@ -61,8 +61,18 @@ class ReviewerAgent:
         text = re.sub(r"(?i)\b365\s*free\b", "", text)
         text = re.sub(r"២៤/៧\s*៣៦៥\s*(?:free)?", "", text, flags=re.IGNORECASE)
 
-        # 6. Remove horizontal dividers (--- or ***)
-        text = re.sub(r"^\s*[\-\*_]{3,}\s*$", "", text, flags=re.MULTILINE)
+        # 6. Super Smart 2cm Divider Standard (No lines above title, only 10-char ~2cm divider below)
+        # A. Purge divider immediately preceding a markdown header
+        text = re.sub(r"^\s*[━─=\-_*~]{3,}\s*\n+(?=#{1,6}\s+)", "", text, flags=re.MULTILINE)
+        # B. Purge top divider when sandwiching a title (divider -> single line -> divider)
+        text = re.sub(r"^\s*[━─=\-_*~]{3,}\s*\n+(?=[^\n]+\n+\s*[━─=\-_*~]{3,})", "", text, flags=re.MULTILINE)
+        # C. Purge divider at very beginning of text
+        text = re.sub(r"^\s*[━─=\-_*~]{3,}\s*\n+", "", text)
+        # D. Normalize any long divider line (>=3 characters) down to strictly 10 characters (~2cm)
+        text = re.sub(r"^\s*[━]{3,}\s*$", "━━━━━━━━━━", text, flags=re.MULTILINE)
+        text = re.sub(r"^\s*[─]{3,}\s*$", "──────────", text, flags=re.MULTILINE)
+        text = re.sub(r"^\s*[=]{3,}\s*$", "──────────", text, flags=re.MULTILINE)
+        text = re.sub(r"^\s*[-_*~]{3,}\s*$", "──────────", text, flags=re.MULTILINE)
 
         # 7. Format unordered list bullets FIRST (* item or - item -> • item)
         text = re.sub(r"^\s*[\*\-\+]\s+", "• ", text, flags=re.MULTILINE)
@@ -182,14 +192,14 @@ class ReviewerAgent:
 
         feedback = (
             "🎯 <b>ការវាយតម្លៃការយល់ដឹងពី REVIEWER AGENT ៖</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             f"📖 <b>លំហាត់ ៖</b> {exercise_title}\n"
             f"🌟 <b>លទ្ធផល ៖</b> 🟢 <b>ទទួលបានជោគជ័យ (PASSED)</b>\n"
             f"🏆 <b>ពិន្ទុបន្ថែម ៖</b> <b>+{points} ពិន្ទុ</b>\n\n"
             "💡 <b>មតិកែលម្អគរុកោសល្យ ៖</b>\n"
             "លោកអ្នកបានបង្ហាញនូវការយល់ដឹងដ៏ល្អ និងការខិតខំដោះស្រាយលំហាត់ជាក់ស្តែង។ "
             "ការអនុវត្តកូដ និងការគិតវិភាគជាជំហានៗបែបនេះ គឺជាគន្លឹះចម្បងក្នុងការឈានទៅដល់កម្រិត Grandmaster!\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         return {
             "passed": passed,

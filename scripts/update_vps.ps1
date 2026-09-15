@@ -1,15 +1,14 @@
-# ==============================================================================
+# ──────────
 # REAN AI - LOCAL / WINDOWS VPS AUTOMATED UPDATE & AUDIT SCRIPT
-# ==============================================================================
+# ──────────
 # Usage:
 #   powershell -ExecutionPolicy Bypass -File .\scripts\update_vps.ps1
-# ==============================================================================
+# ──────────
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "======================================================" -ForegroundColor Cyan
 Write-Host "🚀 REAN AI - Repository Sync & Audit Script" -ForegroundColor Cyan
-Write-Host "======================================================" -ForegroundColor Cyan
+Write-Host "──────────" -ForegroundColor Cyan
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
@@ -25,6 +24,5 @@ Write-Host "`n🔍 Running System Audit..." -ForegroundColor Yellow
 python scripts\audit_system.py
 Write-Host "✅ System Audit passed successfully." -ForegroundColor Green
 
-Write-Host "`n======================================================" -ForegroundColor Green
-Write-Host "🎉 REAN AI UPDATE COMPLETE!" -ForegroundColor Green
-Write-Host "======================================================" -ForegroundColor Green
+Write-Host "`n🎉 REAN AI UPDATE COMPLETE!" -ForegroundColor Green
+Write-Host "──────────" -ForegroundColor Green

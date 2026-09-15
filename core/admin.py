@@ -104,14 +104,14 @@ class SystemMonitor:
 
         header = (
             f"🔔 <b>VIP USER LIVE ACTIVITY ALERT</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"━━━━━━━━━━\n"
             f"👤 <b>User:</b> {user_name}{username_str} [ID: <code>{user.id}</code>]\n"
             f"⚙️ <b>Engine:</b> {engine_name}\n\n"
             f"💬 <b>User Query:</b>\n<i>{query}</i>\n\n"
             f"🤖 <b>AI Full Response:</b>\n"
         )
 
-        full_text = header + response + "\n━━━━━━━━━━━━━━━━━━━━━"
+        full_text = header + response + "\n━━━━━━━━━━"
 
         try:
             # Import send_long_message safely to handle 4000+ char responses

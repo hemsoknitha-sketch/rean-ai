@@ -63,14 +63,14 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     text = (
         "🔒 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ VIP MEMBERSHIP</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         "ដើម្បីចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន និងប្រើប្រាស់ AI Cognitive Engine សូមធ្វើការដំឡើងគណនីរបស់លោកអ្នកទៅជា <b>VIP Membership</b>។\n\n"
         f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
         f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n\n"
         "📩 <b>ទំនាក់ទំនងដើម្បីជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ VIP ៖</b>\n"
         "សូមផ្ញើលេខ Telegram ID ខាងលើទៅកាន់ Admin ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
         "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━"
     )
 
 
@@ -139,12 +139,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             username_str = f" (@{user.username})" if user.username else ""
             alert_text = (
                 "🎉 <b>NEW USER REGISTERED ALERT</b>\n"
-                "━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━\n"
                 f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}{username_str}\n"
                 f"🆔 <b>Telegram ID ៖</b> <code>{user.id}</code>\n"
                 f"📅 <b>កាលបរិច្ឆេទ ៖</b> <code>{user_info.get('joined_at', '')}</code>\n"
                 "👑 <b>ស្ថានភាព ៖</b> 🔴 មិនទាន់ជាវ VIP (Standard Lead)\n"
-                "━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━\n"
                 f"💡 <i>Admin អាចប្រើបញ្ជា <code>/addvip {user.id} 30 {user.first_name}</code> ដើម្បីបើកសិទ្ធិ VIP!</i>"
             )
             await context.bot.send_message(chat_id=Config.ADMIN_CHAT_ID, text=alert_text, parse_mode=ParseMode.HTML)
@@ -164,7 +164,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
     greeting = (
         f"✨ <b>ស្វាគមន៍មកកាន់ SUPREME POLYMATH AI GRANDMASTER!</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         f"👋 ជម្រាបសួរ <b>{user.first_name}</b>!\n"
         "ខ្ញុំគឺជាបណ្តាញខួរក្បាលសិប្បនិម្មិត <b>Polymath AI Grandmaster</b> ដែលមានសមត្ថភាពខ្ពស់បំផុតក្នុងការបង្រៀន AI Masterclasses ទាំង ១,២០០ មេរៀន (១២ ជំនាញ AI) និងនិពន្ធប្រលោមលោកខ្មែរគ្រប់កម្រិត!\n\n"
         f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
@@ -182,7 +182,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         "📩 <b>ទាក់ទងជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ ៖</b>\n"
         f"សូមផ្ញើលេខ Telegram ID <code>{user.id}</code> ទៅកាន់ Admin ៖\n"
         "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━"
     )
 
     if is_admin(user.id):
@@ -258,11 +258,11 @@ async def admin_panel_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     text = (
         "👑 <b>SUPER ADMIN CONTROL PANEL</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         f"<b>Admin ID:</b> <code>{user.id}</code>\n"
         f"<b>VIP Alerts:</b> {'🟢 ENABLED' if SystemMonitor.vip_alerts_enabled else '🔴 DISABLED'}\n"
         f"<b>Active Engine:</b> {'🤖 Local Model' if Config.USE_LOCAL_MODEL else '⚡ Gemini 3.6 Flash'}\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         "Select an Admin control tool from the menu below:"
     )
 
@@ -297,14 +297,14 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     health = SystemMonitor.get_vps_health()
     text = (
         "📊 <b>VPS SYSTEM HEALTH & BOT SERVICE STATUS</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         f"⚙️ <b>Service Status:</b> 🟢 ACTIVE (running)\n"
         f"⏱️ <b>Bot Uptime:</b> {health['uptime']}\n"
         f"💻 <b>CPU Usage:</b> {health['cpu_percent']}%\n"
         f"🧠 <b>RAM Memory:</b> {health['ram_used_gb']} GB / {health['ram_total_gb']} GB ({health['ram_percent']}%)\n"
         f"💾 <b>Disk Storage:</b> {health['disk_used_gb']} GB / {health['disk_total_gb']} GB (Free: {health['disk_free_gb']} GB - {health['disk_percent']}%)\n"
         f"👥 <b>Active Users Count:</b> {health['active_users_count']}\n"
-        "━━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━"
     )
     if update.callback_query:
         await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
@@ -324,12 +324,12 @@ async def models_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     text = (
         "🤖 <b>AI MODEL ENGINE STATUS</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         f"⚡ <b>Active Provider:</b> {status['engine_type']}\n"
         f"🎯 <b>Current Model:</b> <code>{status['active_model']}</code>\n"
         f"🌐 <b>Ollama Server (11434):</b> {'🟢 ONLINE' if status['ollama_online'] else '🔴 OFFLINE'}\n\n"
         f"<b>Installed Ollama Models:</b>\n{models_str}\n"
-        "━━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━"
     )
     if update.callback_query:
         await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
@@ -380,11 +380,11 @@ async def broadcast_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if not context.args:
         text = (
             "📢 <b>BROADCAST ANNOUNCEMENT TOOL</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "To send a broadcast announcement to all active users, please type:\n\n"
             "<code>/broadcast Your Announcement Text Here</code>\n\n"
             "<i>Example:</i> <code>/broadcast 🚀 New AI Course Lessons are now available! Click /ai to learn.</code>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         if update.callback_query:
             await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML)
@@ -414,14 +414,14 @@ async def addvip_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not context.args:
         text = (
             "👑 <b>GRANT VIP LICENSE TOOL</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "To grant or extend VIP access to a user, type:\n\n"
             "<code>/addvip [user_id] [days] [name]</code>\n\n"
             "<i>Examples:</i>\n"
             "• <code>/addvip 123456789 30</code> (Grants 30 days VIP access)\n"
             "• <code>/addvip 123456789 365 VIP Student</code> (Grants 1 year VIP access)\n"
             "• <code>/addvip 123456789 0 Lifetime Admin</code> (Grants Lifetime access)\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
@@ -455,14 +455,14 @@ async def addsupervip_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     if not context.args:
         text = (
             "🌟 <b>GRANT SUPER VIP LICENSE TOOL</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "To grant or extend SUPER VIP tier to a user, type:\n\n"
             "<code>/addsupervip [user_id] [days] [name]</code>\n\n"
             "<i>Examples:</i>\n"
             "• <code>/addsupervip 123456789 30</code> (Grants 30 days Super VIP)\n"
             "• <code>/addsupervip 123456789 365 Super VIP Pro</code> (Grants 1 year Super VIP)\n"
             "• <code>/addsupervip 123456789 0 Lifetime Elite</code> (Grants Lifetime Super VIP)\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
@@ -548,7 +548,7 @@ async def viplist_command(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             f"   • Status: <b>{v.get('status')}</b> | Days Left: <b>{v.get('remaining_days')}</b> | Expiry: <code>{v.get('expiry_date')}</code>"
         )
 
-    text = "📋 <b>VIP LICENSED USERS DATABASE</b>\n━━━━━━━━━━━━━━━━━━━━━\n" + "\n\n".join(lines) + "\n━━━━━━━━━━━━━━━━━━━━━"
+    text = "📋 <b>VIP LICENSED USERS DATABASE</b>\n━━━━━━━━━━\n" + "\n\n".join(lines) + "\n━━━━━━━━━━"
     await send_long_message(update.message, text)
 
 
@@ -566,7 +566,7 @@ async def new_user_list_command(update: Update, context: ContextTypes.DEFAULT_TY
 
     lines = [
         "📋 <b>FREE USERS LEAD DATABASE (មិនទាន់ក្លាយជា VIP)</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         f"📊 <b>ចំនួន Free Leads សរុប ៖</b> <b>{len(free_users)} នាក់</b>\n"
     ]
 
@@ -577,7 +577,7 @@ async def new_user_list_command(update: Update, context: ContextTypes.DEFAULT_TY
         u_joined = u.get("joined_at", "N/A")
         lines.append(f"{idx}. 👤 <b>{uname}</b>{u_handle}\n   🆔 ID: <code>{u_id}</code> | 📅 Joined: <code>{u_joined}</code>")
 
-    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    lines.append("━━━━━━━━━━")
     lines.append("💡 <i>Admin អាចប្រើ <code>/addvip [id] [days] [name]</code> ឬ <code>/addsupervip [id] [days] [name]</code> ដើម្បីដំឡើងសិទ្ធិ!</i>")
 
     full_text = "\n".join(lines)
@@ -594,7 +594,7 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if not VIPManager.is_super_vip(user.id):
         text = (
             "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "មុខងារពិសេស (APEX Khmer Novelist Grandmaster Engine) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
             f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
             f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
@@ -602,7 +602,7 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
             "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
             "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         if update.callback_query:
             await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -615,12 +615,12 @@ async def novel_kh_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if not context.args:
         text = (
             "📖 <b>APEX KHMER NOVELIST GRANDMASTER ENGINE</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "✨ Welcome Super VIP Master! To write a deeply emotional Khmer novel chapter, type:\n\n"
             "<code>/novel_kh [បរិបទ/កាលអាកាស] [តួអង្គ] [គោលដៅ/ទំនាស់] [ជំពូក]</code>\n\n"
             "<i>ឧទាហរណ៍ ៖</i>\n"
             "<code>/novel_kh ក្រុងលង្វែក សម័យបុរាណ, តួអង្គ៖ ជ័យ និង បុប្ផា, គោលដៅ៖ ស្នេហានិងការការពារទឹកដី, ជំពូកទី ១</code>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
@@ -690,7 +690,7 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if not context.args:
         text = (
             "⚡ <b>SUPER SMART NOVEL 18+ ENGINE (ADMIN SECRET CONSOLE)</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "👑 <b>សូមស្វាគមន៍ Super Admin!</b> មុខងារនេះត្រូវបានចាក់សោសម្ងាត់សម្រាប់តែ Admin ប៉ុណ្ណោះ (Users ធម្មតាមើលមិនឃើញឡើយ)។\n\n"
             "<b>របៀបប្រើប្រាស់ (Admin Command Syntax) ៖</b>\n"
             "<code>/novel_18 [HEAT 1-5] [ជំពូកទី N] [សាច់រឿង/តួអង្គ]</code>\n\n"
@@ -706,7 +706,7 @@ async def novel_18_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             "• <b>Auto Chapter Continuity:</b> ចងចាំសាច់រឿងឆ្លងជំពូកស្វ័យប្រវត្តិ\n"
             "• <b>Instant Disk Cache (0.001s):</b> មិនខាត Quota API ពេលហៅជំពូកដដែល\n"
             "• <b>Literary Grandmaster:</b> អក្សរសាស្ត្រខ្មែរផ្ចិតផ្ចង់កម្រិតខ្ពស់ គ្មាននិមិត្តសញ្ញារញ៉េរញ៉ៃ\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
@@ -787,7 +787,7 @@ async def master_prompt_command(update: Update, context: ContextTypes.DEFAULT_TY
     if not VIPManager.is_super_vip(user.id):
         text = (
             "🌟 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ SUPER VIP MEMBERSHIP</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "មុខងារពិសេស (APEX AGI Prompt Genesis Node /master_prompt) ត្រូវបានផ្តល់ជូនដាច់ដោយលែកសម្រាប់តែសមាជិក <b>SUPER VIP Members</b> តែប៉ុណ្ណោះ!\n\n"
             f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
             f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n"
@@ -795,7 +795,7 @@ async def master_prompt_command(update: Update, context: ContextTypes.DEFAULT_TY
             "📩 <b>ទំនាក់ទំនងដើម្បីដំឡើងទៅកាន់ SUPER VIP Membership ៖</b>\n"
             "សូមទាក់ទងទៅកាន់ Super Admin តាមរយៈ Telegram ដើម្បីបើកសិទ្ធិប្រើប្រាស់ ៖\n"
             "• <b>Telegram Admin ៖</b> <b>@Sokpheatonsai</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         if update.callback_query:
             await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -807,14 +807,14 @@ async def master_prompt_command(update: Update, context: ContextTypes.DEFAULT_TY
     if not context.args:
         text = (
             "💡 <b>APEX AGI PROMPT GENESIS ENGINE (MASTER PROMPT)</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "✨ ស្វាគមន៍ Super VIP Master! នេះជា «រោងចក្រផលិតកំពូល Prompts» (The Genesis Node) ដែលអាចបង្កើតកូដបញ្ជា English Master Prompt កម្រិត AGI សម្រាប់យកទៅប្រើប្រាស់បន្ត ៖\n\n"
             "<code>/master_prompt [ប្រធានបទ/គោលដៅ/ជំនាញដែលចង់បាន]</code>\n\n"
             "<i>ឧទាហរណ៍ ៖</i>\n"
             "• <code>/master_prompt អ្នកជំនាញវិភាគទិន្នន័យហិរញ្ញវត្ថុ និង Crypto Trading Analyst</code>\n"
             "• <code>/master_prompt គ្រូបង្រៀនកូដ Python និង Full Stack Web Developer</code>\n"
             "• <code>/master_prompt អ្នកនិពន្ធសៀវភៅជំនួញ និង Marketing Strategy Expert</code>\n"
-            "━━━━━━━━━━━━━━━━━━━━━"
+            "━━━━━━━━━━"
         )
         await update.message.reply_text(text, parse_mode=ParseMode.HTML)
         return
@@ -1021,13 +1021,13 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     """Handles /help command detailing cognitive features in 100% Khmer."""
     help_text = (
         "✨ <b>ស្ថាបត្យកម្ម POLYMATH AI GRANDMASTER</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "━━━━━━━━━━\n"
         "១. <b>១០០ មេរៀនក្នុង ១ ជំនាញ (100-Lesson Master Curriculum) ៖</b> ចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន ដោយប្រើប្រាស់បញ្ជា <b>/ai</b>។\n"
         "២. <b>បំបែកគំនិតស្មុគស្មាញ (First-Principles Deconstruction) ៖</b> បំប្លែងទ្រឹស្តី និងកូដស្មុគស្មាញ ទៅជាការយល់ដឹងបែបធម្មជាតិ និងច្បាស់លាស់។\n"
         "៣. <b>បណ្តាញខួរក្បាល Multi-Agent ៖</b> ប្រព័ន្ធស្កែនបំណង (Evaluator) -> ប្រព័ន្ធបង្កើតចម្លើយ (Architect) -> ប្រព័ន្ធកែសម្រួលអក្សរសាស្ត្រ (Reviewer)។\n"
         "៤. <b>ប្រព័ន្ធចងចាំបរិបទសន្ទនា (Sliding-Window Memory) ៖</b> ចងចាំប្រវត្តិសន្ទនាស្វ័យប្រវត្តិ។\n\n"
         "💡 ប្រើប្រាស់ <b>/ai</b> ដើម្បីមើលបញ្ជីមេរៀន ឬ <b>/reset</b> ដើម្បីលុបប្រវត្តិសន្ទនាចាស់។\n"
-        "━━━━━━━━━━━━━━━━━━━━━"
+        "━━━━━━━━━━"
     )
     await update.message.reply_text(help_text, parse_mode=ParseMode.HTML)
 
@@ -1114,7 +1114,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             f"🏆 <b>ពិន្ទុថ្មី ៖</b> <b>+{points_earned} ពិន្ទុ</b> (ពិន្ទុសរុប៖ <b>{res['new_score']} ពិន្ទុ</b>)\n"
             f"🎖️ <b>កម្រិតសមត្ថភាព ៖</b> {res['level_emoji']} <b>{res['level_title']}</b>\n"
             f"📝 <b>លំហាត់បានបញ្ចប់សរុប ៖</b> <b>{res['completed_count']} លំហាត់</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "━━━━━━━━━━\n\n"
         )
         full_eval_response = eval_header + feedback_content
 

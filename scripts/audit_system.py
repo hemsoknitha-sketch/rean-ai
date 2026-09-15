@@ -50,13 +50,12 @@ class SystemAuditor:
         self.warnings += 1
         print(f"  [WARN] {name}: {reason}")
 
-    # =========================================================================
+    # ──────────
     # 1. PYTHON SYNTAX & MODULE COMPILATION AUDIT
-    # =========================================================================
+    # ──────────
     def audit_syntax_and_compilation(self):
-        print("\n" + "=" * 65)
-        print("1. AUDITING PYTHON SYNTAX & CODE COMPILATION")
-        print("=" * 65)
+        print("\n1. AUDITING PYTHON SYNTAX & CODE COMPILATION")
+        print("──────────")
 
         files_to_check = [
             PROJECT_ROOT / "main.py",
@@ -87,13 +86,12 @@ class SystemAuditor:
             except Exception as e:
                 self.log_fail(f"Syntax: {file_path.relative_to(PROJECT_ROOT)}", str(e))
 
-    # =========================================================================
+    # ──────────
     # 2. SECURITY & ADMIN-ONLY COMMAND GATEKEEPING AUDIT
-    # =========================================================================
+    # ──────────
     def audit_admin_security_gatekeeping(self):
-        print("\n" + "=" * 65)
-        print("2. AUDITING SECURITY, ADMIN PERMISSIONS & COMMAND CONCEALMENT")
-        print("=" * 65)
+        print("\n2. AUDITING SECURITY, ADMIN PERMISSIONS & COMMAND CONCEALMENT")
+        print("──────────")
 
         # A. Check Admin ID verification
         admin_id = 859271875
@@ -135,13 +133,12 @@ class SystemAuditor:
             else:
                 self.log_fail("admin_commands in main.py", "novel_18 missing from Admin menu!")
 
-    # =========================================================================
+    # ──────────
     # 3. PROHIBITED STRINGS & LEAKAGE SANITIZATION AUDIT
-    # =========================================================================
+    # ──────────
     def audit_content_sanitization_and_leaks(self):
-        print("\n" + "=" * 65)
-        print("3. AUDITING USER SPACE FOR LEAKS (18+, 24/7 365 FREE, $0 LIMIT)")
-        print("=" * 65)
+        print("\n3. AUDITING USER SPACE FOR LEAKS (18+, 24/7 365 FREE, $0 LIMIT)")
+        print("──────────")
 
         handlers_py = (PROJECT_ROOT / "bot" / "handlers.py").read_text(encoding="utf-8")
 
@@ -180,13 +177,12 @@ class SystemAuditor:
         else:
             self.log_pass("Curriculum Modules", "Cleaned 24/7 slogans from all module titles")
 
-    # =========================================================================
+    # ──────────
     # 4. REVIEWER AGENT & LANGUAGE PURITY VERIFICATION
-    # =========================================================================
+    # ──────────
     def audit_reviewer_language_purity_and_code_blocks(self):
-        print("\n" + "=" * 65)
-        print("4. AUDITING REVIEWER AGENT: LANGUAGE PURITY & COPIEDABLE CODES")
-        print("=" * 65)
+        print("\n4. AUDITING REVIEWER AGENT: LANGUAGE PURITY & COPIEDABLE CODES")
+        print("──────────")
 
         sample_input = """
 📘 មេរៀនស្តីពី Deep Learning (ការរៀនស៊ីជម្រៅ)
@@ -257,13 +253,32 @@ content: Master AI prompt template
         else:
             self.log_fail("Khmer Text Preservation", "Khmer text corrupted during sanitization!")
 
-    # =========================================================================
+        # Verify 2cm Divider Standard (Purge line above header, collapse long divider to 10 chars)
+        sample_divider_input = (
+            "=====================================================\n"
+            "### ចំណងជើងមេរៀន (Lesson Title)\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "ខ្លឹមសារ..."
+        )
+        cleaned_divider_html = ReviewerAgent.format_for_telegram_html(sample_divider_input)
+        if "=====================================================" in cleaned_divider_html:
+            self.log_fail("Divider Above Header", "Failed to purge divider line above title!")
+        else:
+            self.log_pass("Divider Above Header", "Purged divider line above title successfully")
+
+        if "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" in cleaned_divider_html:
+            self.log_fail("2cm Divider Standard", "Failed to normalize long divider down to 10 characters!")
+        elif "━━━━━━━━━━" in cleaned_divider_html:
+            self.log_pass("2cm Divider Standard", "Normalized divider to strictly 10 characters (~2cm)")
+        else:
+            self.log_fail("2cm Divider Standard", "10-character divider was missing or altered")
+
+    # ──────────
     # 5. CURRICULUM ENGINE ARCHITECTURE (1,200 UNIQUE LESSONS)
-    # =========================================================================
+    # ──────────
     def audit_curriculum_engine_and_anti_repetition(self):
-        print("\n" + "=" * 65)
-        print("5. AUDITING CURRICULUM: 1,200 DISTINCT LESSONS & 6-PILLAR ARCHITECTURE")
-        print("=" * 65)
+        print("\n5. AUDITING CURRICULUM: 1,200 DISTINCT LESSONS & 6-PILLAR ARCHITECTURE")
+        print("──────────")
 
         # Verify 12 courses
         if len(AI_COURSES) == 12:
@@ -328,13 +343,12 @@ content: Master AI prompt template
         else:
             self.log_fail("6-Pillar Architecture", "Missing 6-pillar curriculum structure in prompt!")
 
-    # =========================================================================
+    # ──────────
     # 6. SYSTEM HEALTH & METRICS AUDIT
-    # =========================================================================
+    # ──────────
     def audit_system_health_metrics(self):
-        print("\n" + "=" * 65)
-        print("6. AUDITING SYSTEM HEALTH & MATHEMATICAL ACCURACY")
-        print("=" * 65)
+        print("\n6. AUDITING SYSTEM HEALTH & MATHEMATICAL ACCURACY")
+        print("──────────")
 
         try:
             health = SystemMonitor.get_vps_health()
@@ -354,13 +368,12 @@ content: Master AI prompt template
         except Exception as e:
             self.log_fail("VPS Health Telemetry", str(e))
 
-    # =========================================================================
+    # ──────────
     # 7. CONSTITUTIONAL CHARTER AUDIT (AGENTS.md & METAPHYSICS_STANDARDS.md)
-    # =========================================================================
+    # ──────────
     def audit_constitutional_charters(self):
-        print("\n" + "=" * 65)
-        print("7. AUDITING CONSTITUTIONAL CHARTERS & METAPHYSICS STANDARDS")
-        print("=" * 65)
+        print("\n7. AUDITING CONSTITUTIONAL CHARTERS & METAPHYSICS STANDARDS")
+        print("──────────")
 
         agents_md = PROJECT_ROOT / "AGENTS.md"
         meta_md = PROJECT_ROOT / "METAPHYSICS_STANDARDS.md"
@@ -383,13 +396,12 @@ content: Master AI prompt template
         else:
             self.log_fail("METAPHYSICS_STANDARDS.md", "Missing METAPHYSICS_STANDARDS.md at workspace root!")
 
-    # =========================================================================
+    # ──────────
     # 8. SOCRATIC LEARNING MODE & STUDENT PROGRESS DATABASE AUDIT
-    # =========================================================================
+    # ──────────
     def audit_socratic_learning_and_student_database(self):
-        print("\n" + "=" * 65)
-        print("8. AUDITING SOCRATIC LEARNING MODES & STUDENT DATABASE")
-        print("=" * 65)
+        print("\n8. AUDITING SOCRATIC LEARNING MODES & STUDENT DATABASE")
+        print("──────────")
 
         # A. Verify User Isolation by Telegram ID
         user_a_id = 999111999
@@ -461,13 +473,12 @@ content: Master AI prompt template
         StudentManager._students.pop("111", None)
         StudentManager._save_db()
 
-    # =========================================================================
+    # ──────────
     # RUN ALL AUDITS & REPORT
-    # =========================================================================
+    # ──────────
     def run_all_audits(self) -> bool:
-        print("\n" + "#" * 65)
-        print("       SUPREME REAN AI SYSTEM AUDIT & ARCHITECTURAL VERIFIER")
-        print("#" * 65)
+        print("\nSUPREME REAN AI SYSTEM AUDIT & ARCHITECTURAL VERIFIER")
+        print("──────────")
 
         self.audit_syntax_and_compilation()
         self.audit_admin_security_gatekeeping()
@@ -478,9 +489,8 @@ content: Master AI prompt template
         self.audit_constitutional_charters()
         self.audit_socratic_learning_and_student_database()
 
-        print("\n" + "=" * 65)
-        print("FINAL AUDIT SUMMARY REPORT")
-        print("=" * 65)
+        print("\nFINAL AUDIT SUMMARY REPORT")
+        print("──────────")
         print(f"  TOTAL CHECKS PASSED: {self.passed_checks}")
         print(f"  TOTAL CHECKS FAILED: {self.failed_checks}")
         print(f"  TOTAL WARNINGS     : {self.warnings}")

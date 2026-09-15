@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# ==============================================================================
+# ──────────
 # REAN AI - GOOGLE CLOUD VPS AUTOMATED UPDATE & DEPLOYMENT SCRIPT
-# ==============================================================================
+# ──────────
 # Usage:
 #   chmod +x scripts/update_vps.sh
 #   ./scripts/update_vps.sh
-# ==============================================================================
+# ──────────
 
 set -e
 
@@ -16,9 +16,8 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}======================================================${NC}"
 echo -e "${BLUE}🚀 REAN AI - Google Cloud VPS Deployment Sync${NC}"
-echo -e "${BLUE}======================================================${NC}"
+echo -e "${BLUE}──────────${NC}"
 
 # 1. Navigate to Project Root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -123,6 +122,5 @@ if [ "$RESTARTED" = false ]; then
     fi
 fi
 
-echo -e "\n${GREEN}======================================================${NC}"
-echo -e "${GREEN}🎉 GOOGLE CLOUD VPS UPDATE COMPLETE & ACTIVE!${NC}"
-echo -e "${GREEN}======================================================${NC}"
+echo -e "\n${GREEN}🎉 GOOGLE CLOUD VPS UPDATE COMPLETE & ACTIVE!${NC}"
+echo -e "${GREEN}──────────${NC}"

@@ -241,7 +241,7 @@ class StudentManager:
 
         card = (
             "🎓 <b>កាតព័ត៌មាន និងកម្រិតសមត្ថភាពសិស្ស (STUDENT PROFILE)</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             f"👤 <b>សិស្ស ៖</b> {student.get('name', 'Student')}\n"
             f"🆔 <b>Telegram ID ៖</b> <code>{user_id}</code>\n"
             f"🎯 <b>របៀបសិក្សាបច្ចុប្បន្ន ៖</b> {mode_str}\n"
@@ -249,7 +249,7 @@ class StudentManager:
             f"🎖️ <b>កម្រិតបច្ចុប្បន្ន ៖</b> {emoji} <b>{title}</b>\n"
             f"📝 <b>លំហាត់ដែលបានបញ្ចប់ ៖</b> <b>{completed} លំហាត់</b>\n"
             f"📈 <b>វឌ្ឍនភាព ៖</b> <i>{next_tier}</i>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n"
+            "━━━━━━━━━━\n"
             "💡 <i>លោកអ្នកអាចជ្រើសរើសផ្លាស់ប្តូររបៀបសិក្សា (Learning Mode) ខាងក្រោមបានគ្រប់ពេលវេលា ៖</i>"
         )
         return card

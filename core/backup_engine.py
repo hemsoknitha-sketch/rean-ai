@@ -57,17 +57,18 @@ class BackupEngine:
 
             caption = (
                 "📦 <b>AUTOMATED DAILY SYSTEM DATABASE BACKUP</b>\n"
-                "━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━\n"
                 f"📅 <b>កាលបរិច្ឆេទ ៖</b> <code>{date_str}</code> (Phnom Penh ICT +7)\n"
                 f"💾 <b>ទំហំឯកសារ ៖</b> <b>{size_kb} KB</b> (ZIP Archive)\n\n"
                 "📋 <b>ទិន្នន័យដែលបាន Backup ៖</b>\n"
+                "• 🎓 Student Progress & Scores (<code>student_records.json</code>)\n"
                 "• 👑 VIP & Super VIP Members DB (<code>vip_users.json</code>)\n"
                 "• 👤 Registered Free Leads DB (<code>registered_users.json</code>)\n"
-                "• 🎓 1,200 AI Masterclasses Cache (<code>lesson_cache.json</code>)\n"
+                "• 📚 1,200 AI Masterclasses Cache (<code>lesson_cache.json</code>)\n"
                 "• 📖 APEX Khmer Novel Cache (<code>novel_cache.json</code>)\n"
                 "• 🔞 Queen of Romance 18+ Cache (<code>novel_18_cache.json</code>)\n"
                 "• 💡 AGI Master Prompt Cache (<code>master_prompt_cache.json</code>)\n"
-                "━━━━━━━━━━━━━━━━━━━━━\n"
+                "━━━━━━━━━━\n"
                 "🔒 <b>សុវត្ថិភាព ៖</b> ទិន្នន័យត្រូវបានរក្សាទុកមានសុវត្ថិភាព ១០០% គ្មានថ្ងៃបាត់បង់ឡើយ!"
             )
 
