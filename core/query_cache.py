@@ -23,6 +23,33 @@ class QueryCache:
             try:
                 with open(CACHE_FILE, "r", encoding="utf-8") as f:
                     cls._cache = json.load(f)
+
+                # Auto-purge corrupted cache entries (error messages, API rate limits, temporary latency errors)
+                error_signatures = [
+                    "Polymath Cognitive Engine encountered",
+                    "RESOURCE_EXHAUSTED",
+                    "Rate Limit",
+                    "Authentication Error",
+                    "Service Unavailable",
+                    "UNAVAILABLE",
+                    "temporary latency standard error",
+                    "network anomaly",
+                    "Rate Limit / Quota Reached",
+                    "API key not valid",
+                    "API_KEY_INVALID",
+                ]
+                valid_cache = {
+                    k: v for k, v in cls._cache.items()
+                    if isinstance(v, str)
+                    and not any(sig in v for sig in error_signatures)
+                }
+                if len(valid_cache) < len(cls._cache):
+                    purged_count = len(cls._cache) - len(valid_cache)
+                    logger.warning(f"Purged {purged_count} corrupted error entries from persistent query cache.")
+                    cls._cache = valid_cache
+                    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                        json.dump(cls._cache, f, ensure_ascii=False, indent=2)
+
                 logger.info(f"Loaded {len(cls._cache)} persistent Q&A queries from disk cache.")
             except Exception as e:
                 logger.error(f"Error loading query cache: {e}")
@@ -43,8 +70,28 @@ class QueryCache:
         return cached
 
     @classmethod
-    def set(cls, query: str, lang: str, response: str) -> None:
-        """Saves generated Q&A answer to persistent disk cache."""
+    def set(cls, query: str, lang: str, response: str) -> bool:
+        """Saves generated Q&A answer to persistent disk cache with error filtering."""
+        if not response or len(response.strip()) < 5:
+            return False
+
+        error_signatures = [
+            "Polymath Cognitive Engine encountered",
+            "RESOURCE_EXHAUSTED",
+            "Rate Limit",
+            "Authentication Error",
+            "Service Unavailable",
+            "UNAVAILABLE",
+            "temporary latency standard error",
+            "network anomaly",
+            "Rate Limit / Quota Reached",
+            "API key not valid",
+            "API_KEY_INVALID",
+        ]
+        if any(sig in response for sig in error_signatures):
+            logger.warning("Refusing to save error response to persistent QueryCache.")
+            return False
+
         cls._ensure_loaded()
         key = cls._normalize(query, lang)
         cls._cache[key] = response
@@ -52,5 +99,7 @@ class QueryCache:
             with open(CACHE_FILE, "w", encoding="utf-8") as f:
                 json.dump(cls._cache, f, ensure_ascii=False, indent=2)
             logger.info(f"Saved persistent query Q&A '{query[:30]}...' to disk cache.")
+            return True
         except Exception as e:
             logger.error(f"Error saving query cache: {e}")
+            return False

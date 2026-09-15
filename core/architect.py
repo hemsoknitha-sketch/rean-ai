@@ -162,9 +162,15 @@ class ArchitectAgent:
         user_state: UserState,
         intent: IntentAnalysis,
     ) -> str:
-        """Asynchronously generates response using Response Cache, Local LLM, or Gemini API."""
-        # 1. Check Persistent General Query Cache (0.001s Instant Response + $0 API Cost)
-        if not user_state.history:
+        # Identify if this query is an educational lesson generation request
+        is_lesson_req = (
+            "lesson request:" in user_query.lower()
+            or "target lesson:" in user_query.lower()
+            or "supreme polymath ai grandmaster delivering an elite tutorial" in user_query.lower()
+        )
+
+        # 1. Check Persistent General Query Cache (Only for general conversational Q&As, NEVER for masterclass lessons)
+        if not user_state.history and not is_lesson_req:
             cached_resp = QueryCache.get(user_query, intent.language_hint)
             if cached_resp:
                 return cached_resp
@@ -195,7 +201,7 @@ class ArchitectAgent:
                 system_prompt=APEX_GRANDMASTER_SYSTEM_PROMPT
             )
             if local_resp:
-                if not user_state.history:
+                if not user_state.history and not is_lesson_req:
                     self.cache.set(user_query, intent.language_hint, local_resp)
                     QueryCache.set(user_query, intent.language_hint, local_resp)
                 return local_resp
@@ -209,7 +215,6 @@ class ArchitectAgent:
 
         # 4. Determine Dynamic Search Grounding requirement to eliminate unnecessary delay
         # Enable search ONLY if query explicitly asks for recent news or search AND it is NOT a lesson request
-        is_lesson_req = "lesson request:" in user_query.lower() or "target lesson:" in user_query.lower()
         search_keywords = ["search", "news", "today", "latest", "ស្វែងរក", "បច្ចុប្បន្នភាព", "ព័ត៌មាន", "ថ្ងៃនេះ"]
         needs_search = (not is_lesson_req) and any(kw in user_query.lower() for kw in search_keywords)
 
@@ -222,7 +227,7 @@ class ArchitectAgent:
                 needs_search,
                 is_lesson_req
             )
-            if response and not user_state.history:
+            if response and not user_state.history and not is_lesson_req:
                 self.cache.set(user_query, intent.language_hint, response)
                 QueryCache.set(user_query, intent.language_hint, response)
             return response
