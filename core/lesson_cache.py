@@ -25,6 +25,11 @@ class LessonCache:
                     cls._cache = json.load(f)
                 
                 # Auto-purge corrupted cache entries (e.g. &#x27;, &quot;, missing <pre><code, <1000 chars, or error strings)
+                exact_error_signatures = [
+                    "The Polymath Cognitive Engine encountered a temporary latency",
+                    "Rate Limit / Quota Reached: You have reached",
+                    "Authentication Error: The Gemini API Key configured",
+                ]
                 valid_cache = {
                     k: v for k, v in cls._cache.items()
                     if isinstance(v, str)
@@ -32,7 +37,7 @@ class LessonCache:
                     and "&#x27;" not in v
                     and "&quot;" not in v
                     and "<pre><code" in v
-                    and not any(err in v for err in ["Polymath Cognitive Engine encountered", "RESOURCE_EXHAUSTED", "Rate Limit", "Authentication Error", "Service Unavailable", "UNAVAILABLE"])
+                    and not any(err in v for err in exact_error_signatures)
                 }
                 if len(valid_cache) < len(cls._cache):
                     purged_count = len(cls._cache) - len(valid_cache)
@@ -69,7 +74,12 @@ class LessonCache:
             logger.warning(f"Refusing to cache content without copyable code block for {course_key}:{lesson_num}:{lang}.")
             return False
 
-        if any(err in content for err in ["Polymath Cognitive Engine encountered", "RESOURCE_EXHAUSTED", "Rate Limit", "Authentication Error", "Service Unavailable", "UNAVAILABLE"]):
+        exact_error_signatures = [
+            "The Polymath Cognitive Engine encountered a temporary latency",
+            "Rate Limit / Quota Reached: You have reached",
+            "Authentication Error: The Gemini API Key configured",
+        ]
+        if any(err in content for err in exact_error_signatures):
             logger.warning(f"Refusing to cache error message for {course_key}:{lesson_num}:{lang}.")
             return False
 

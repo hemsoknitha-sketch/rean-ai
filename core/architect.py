@@ -254,17 +254,22 @@ class ArchitectAgent:
     def _get_fallback_candidates(self) -> list[str]:
         """Returns ordered list of resilient candidate models available in 2026."""
         primary_order = [
-            self.model_name,
             "gemini-flash-latest",
+            "gemini-3.1-flash-lite",
             "gemini-3.7-flash",
             "gemini-3.5-flash",
             "gemini-flash-lite-latest",
-            "gemini-3.1-flash-lite",
             "gemini-3.8-flash",
             "gemini-3-flash-preview",
             "gemini-3.5-flash-lite",
             "gemini-3.6-flash"
         ]
+        # Only put self.model_name first if it's not gemini-3.6-flash (which is capped at 20 RPD on free tier)
+        if self.model_name and self.model_name != "gemini-3.6-flash":
+            if self.model_name in primary_order:
+                primary_order.remove(self.model_name)
+            primary_order.insert(0, self.model_name)
+
         candidates = []
         for m in primary_order:
             if m and m not in candidates:

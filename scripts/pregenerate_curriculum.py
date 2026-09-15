@@ -85,7 +85,12 @@ async def pregenerate_lesson(
             logger.error(f"  [FAIL] Missing copyable code block in lesson for {course_key}:{lesson_num}")
             return False
 
-        if any(err in sanitized for err in ["Polymath Cognitive Engine encountered", "RESOURCE_EXHAUSTED", "Rate Limit", "Authentication Error", "Service Unavailable", "UNAVAILABLE"]):
+        exact_error_signatures = [
+            "The Polymath Cognitive Engine encountered a temporary latency",
+            "Rate Limit / Quota Reached: You have reached",
+            "Authentication Error: The Gemini API Key configured",
+        ]
+        if any(err in sanitized for err in exact_error_signatures):
             logger.error(f"  [FAIL] Detected error message instead of masterclass lesson for {course_key}:{lesson_num}")
             return False
 

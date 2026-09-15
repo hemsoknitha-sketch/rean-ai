@@ -24,24 +24,17 @@ class QueryCache:
                 with open(CACHE_FILE, "r", encoding="utf-8") as f:
                     cls._cache = json.load(f)
 
-                # Auto-purge corrupted cache entries (error messages, API rate limits, temporary latency errors)
-                error_signatures = [
-                    "Polymath Cognitive Engine encountered",
-                    "RESOURCE_EXHAUSTED",
-                    "Rate Limit",
-                    "Authentication Error",
-                    "Service Unavailable",
-                    "UNAVAILABLE",
-                    "temporary latency standard error",
-                    "network anomaly",
-                    "Rate Limit / Quota Reached",
-                    "API key not valid",
-                    "API_KEY_INVALID",
+                # Auto-purge corrupted cache entries (exact error returns from engine)
+                exact_error_signatures = [
+                    "The Polymath Cognitive Engine encountered a temporary latency",
+                    "Rate Limit / Quota Reached: You have reached",
+                    "Authentication Error: The Gemini API Key configured",
+                    "temporary latency standard error or network anomaly",
                 ]
                 valid_cache = {
                     k: v for k, v in cls._cache.items()
                     if isinstance(v, str)
-                    and not any(sig in v for sig in error_signatures)
+                    and not any(sig in v for sig in exact_error_signatures)
                 }
                 if len(valid_cache) < len(cls._cache):
                     purged_count = len(cls._cache) - len(valid_cache)
@@ -75,20 +68,13 @@ class QueryCache:
         if not response or len(response.strip()) < 5:
             return False
 
-        error_signatures = [
-            "Polymath Cognitive Engine encountered",
-            "RESOURCE_EXHAUSTED",
-            "Rate Limit",
-            "Authentication Error",
-            "Service Unavailable",
-            "UNAVAILABLE",
-            "temporary latency standard error",
-            "network anomaly",
-            "Rate Limit / Quota Reached",
-            "API key not valid",
-            "API_KEY_INVALID",
+        exact_error_signatures = [
+            "The Polymath Cognitive Engine encountered a temporary latency",
+            "Rate Limit / Quota Reached: You have reached",
+            "Authentication Error: The Gemini API Key configured",
+            "temporary latency standard error or network anomaly",
         ]
-        if any(sig in response for sig in error_signatures):
+        if any(sig in response for sig in exact_error_signatures):
             logger.warning("Refusing to save error response to persistent QueryCache.")
             return False
 
