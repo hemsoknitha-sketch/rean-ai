@@ -23,25 +23,49 @@ class ReviewerAgent:
 
         # 1. Save code blocks (```python ... ```) -> <pre><code class="language-python">...</code></pre>
         code_blocks = []
+        def auto_detect_language(code_str: str) -> str:
+            """Smart language auto-detector to ensure Telegram Copy button and syntax highlighting always activate."""
+            raw_lower = code_str.lower()
+            if any(kw in raw_lower for kw in ["pip ", "sudo ", "apt ", "git ", "npm ", "chmod ", "cd ", "curl ", "#!/bin/bash", "#!/usr/bin"]):
+                return "bash"
+            if any(kw in raw_lower for kw in ["select ", "insert into", "create table", "alter table", "drop table", "delete from"]):
+                return "sql"
+            if any(kw in raw_lower for kw in ["def ", "import ", "class ", "print(", "__init__", "torch", "pandas", "np.", "tf."]) or ("from " in raw_lower and "import " in raw_lower):
+                return "python"
+            if any(kw in raw_lower for kw in ["role:", "content:", "model:", "temperature:", "version:"]):
+                return "yaml"
+            if any(kw in raw_lower for kw in ["const ", "let ", "function", "console.log", "document."]):
+                return "javascript"
+            if any(kw in raw_lower for kw in ["<html", "<div", "<pre", "<body", "<span"]):
+                return "html"
+            if any(kw in raw_lower for kw in ["{", "}", '":']):
+                return "json"
+            return "python"  # Default to python for AI education
+
         def save_code_block(match):
             lang = match.group(1).strip().lower()
             code_content = html.escape(match.group(2).strip())
-            if lang:
-                code_blocks.append(f'<pre><code class="language-{lang}">{code_content}</code></pre>')
-            else:
-                code_blocks.append(f'<pre><code>{code_content}</code></pre>')
-            return f"@@@CODEBLOCK{len(code_blocks)-1}@@@"
+            if not lang:
+                lang = auto_detect_language(code_content)
+            code_blocks.append(f'<pre><code class="language-{lang}">{code_content}</code></pre>')
+            return f"\n\n@@@CODEBLOCK{len(code_blocks)-1}@@@\n\n"
 
         text = re.sub(r"```([\w\-]*)\n?(.*?)```", save_code_block, text, flags=re.DOTALL)
 
-        # 2. Save inline code (`code`)
+        # 2. Save inline code (`code`) -> <code>code</code> (Telegram Tap-to-Copy)
         inline_codes = []
         def save_inline_code(match):
-            code_content = html.escape(match.group(1))
-            inline_codes.append(f"<code>{code_content}</code>")
-            return f"@@@INLINECODE{len(inline_codes)-1}@@@"
+            code_content = html.escape(match.group(1).strip())
+            if code_content:
+                inline_codes.append(f"<code>{code_content}</code>")
+                return f"@@@INLINECODE{len(inline_codes)-1}@@@"
+            return ""
 
         text = re.sub(r"`([^`\n]+)`", save_inline_code, text)
+
+        # 2b. Typographic Alignment & Layout Normalization (អក្សរតម្រឹមស្មើសងខាង)
+        # Trim trailing whitespace on every line to prevent ragged wrapping
+        text = "\n".join(line.rstrip() for line in text.splitlines())
 
         # 3. Escape HTML special characters for remaining prose
         text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
@@ -108,6 +132,9 @@ class ReviewerAgent:
             text = text.replace(f"@@@CODEBLOCK{idx}@@@", block)
         for idx, code in enumerate(inline_codes):
             text = text.replace(f"@@@INLINECODE{idx}@@@", code)
+
+        # 15. Final typographic pass: Clean up excessive blank lines around code blocks
+        text = re.sub(r"\n{3,}", "\n\n", text)
 
         return text.strip()
 

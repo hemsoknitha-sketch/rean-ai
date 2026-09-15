@@ -273,6 +273,41 @@ content: Master AI prompt template
         else:
             self.log_fail("2cm Divider Standard", "10-character divider was missing or altered")
 
+        # Verify Multi-Block Copyable Code & Language Auto-Detection
+        multi_code_sample = (
+            "ជំហានទី ១ ៖ ដំឡើងបណ្ណាល័យ `pip install torch`\n"
+            "```\n"
+            "pip install torch\n"
+            "```\n\n"
+            "ជំហានទី ២ ៖ បង្កើត Linear Layer ជាមួយ `torch.nn`\n"
+            "```\n"
+            "import torch\n"
+            "import torch.nn as nn\n"
+            "layer = nn.Linear(10, 2)\n"
+            "```\n\n"
+            "ជំហានទី ៣ ៖ សំណួរទិន្នន័យ SQL\n"
+            "```\n"
+            "SELECT id, name FROM students WHERE score >= 50;\n"
+            "```\n"
+        )
+        cleaned_multi_code = ReviewerAgent.format_for_telegram_html(multi_code_sample)
+
+        # Verify all 3 blocks have language class and copyable structure
+        has_bash = '<pre><code class="language-bash">pip install torch</code></pre>' in cleaned_multi_code
+        has_py = '<pre><code class="language-python">' in cleaned_multi_code
+        has_sql = '<pre><code class="language-sql">' in cleaned_multi_code
+
+        if has_bash and has_py and has_sql:
+            self.log_pass("Multi-Block Copyable Codes", "Rendered multiple independent copyable code blocks with auto-detected languages")
+        else:
+            self.log_fail("Multi-Block Copyable Codes", f"Missing expected language tags in multi-code blocks: bash={has_bash}, py={has_py}, sql={has_sql}")
+
+        # Verify Short Code Tap-to-Copy
+        if "<code>pip install torch</code>" in cleaned_multi_code and "<code>torch.nn</code>" in cleaned_multi_code:
+            self.log_pass("Short Code Tap-to-Copy", "Rendered short inline commands in tap-to-copy <code> format")
+        else:
+            self.log_fail("Short Code Tap-to-Copy", "Short inline code missing <code> formatting")
+
     # ──────────
     # 5. CURRICULUM ENGINE ARCHITECTURE (1,200 UNIQUE LESSONS)
     # ──────────

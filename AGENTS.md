@@ -91,12 +91,21 @@ Every lesson must strictly follow the 6 numbered sections:
 5. **៥. កូដគំរូ និង Prompt ជាក់ស្តែង Copiedable Super Smart (Complete Ready-to-Run Code & Prompts)**
 6. **៦. ការអនុវត្តជាក់ស្តែង និងសំណួរឆ្លុះបញ្ចាំង (Hands-on Lab & Socratic Reflection)**
 
-### D. Copiedable Super Smart Code Block Formatting
-- All code blocks must be rendered as `<pre><code class="language-{lang}">...</code></pre>`.
-- In Telegram, this automatically produces the dedicated **Copy Code** button in the top-right corner.
-- Master Prompts must be wrapped in `<pre><code class="language-yaml">...</code></pre>` or `<pre><code class="language-markdown">...</code></pre>` for instant 1-tap copying on mobile and desktop.
-- Inline commands must use `<code>...</code>` for tap-to-copy convenience.
-- Zero incomplete placeholders: Never write `# TODO` or `# Insert code here`; all code must be 100% complete and runnable.
+### D. Copiedable Super Smart Code Architecture & Balanced Typography (អក្សរតម្រឹមស្មើសងខាង)
+- **100% Copyable Code Blocks (1-Tap Copy)**:
+  - All multi-line code blocks must be rendered as `<pre><code class="language-{lang}">...</code></pre>`.
+  - In Telegram, this automatically produces the dedicated **Copy Code** button in the top-right corner.
+  - Smart language auto-detection dynamically activates syntax highlighting and the Copy button even if an LLM omits the language tag.
+- **Multiple Code Blocks Isolation**:
+  - When explaining complex setups, separate commands (e.g. `pip install`), script implementations (`python`), and prompt templates (`yaml`) into distinct, individually copyable blocks.
+- **Short & Inline Commands (Tap-to-Copy)**:
+  - Inline commands, variable names, functions, and parameters must use `<code>...</code>` (from raw `` `code` ``) for instant 1-tap mobile copying.
+- **Balanced Typography & Layout (អក្សរតម្រឹមស្មើសងខាង)**:
+  - Organize prose into balanced paragraphs (2-3 sentences each) with symmetrical vertical margins.
+  - Sub-points must use uniform bullet points (`• `) with clean indentation.
+  - Dividers must strictly use the 2cm standard (`──────────`, 10 characters) placed exclusively *below* headers, never above.
+  - Trailing whitespaces are automatically purged on every line to prevent ragged, awkward wrapping.
+- **Zero Incomplete Placeholders in Explanatory Mode**: Explanatory lessons must provide 100% complete, runnable code with zero missing imports or syntax breaks. Socratic mode utilizes explicit scaffolding (`# TODO: បំពេញកូដនៅទីនេះ`).
 
 ---
 
