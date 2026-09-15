@@ -23,6 +23,19 @@ class LessonCache:
             try:
                 with open(CACHE_FILE, "r", encoding="utf-8") as f:
                     cls._cache = json.load(f)
+                
+                # Auto-purge corrupted cache entries (e.g. &#x27;, &quot; or missing <pre><code)
+                valid_cache = {
+                    k: v for k, v in cls._cache.items()
+                    if isinstance(v, str) and "&#x27;" not in v and "&quot;" not in v and "<pre><code" in v
+                }
+                if len(valid_cache) < len(cls._cache):
+                    purged_count = len(cls._cache) - len(valid_cache)
+                    logger.warning(f"Purged {purged_count} corrupted lesson cache entries from disk cache.")
+                    cls._cache = valid_cache
+                    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+                        json.dump(cls._cache, f, ensure_ascii=False, indent=2)
+
                 logger.info(f"Loaded {len(cls._cache)} pre-generated lessons from disk cache.")
             except Exception as e:
                 logger.error(f"Error loading lesson cache: {e}")

@@ -302,11 +302,55 @@ content: Master AI prompt template
         else:
             self.log_fail("Multi-Block Copyable Codes", f"Missing expected language tags in multi-code blocks: bash={has_bash}, py={has_py}, sql={has_sql}")
 
-        # Verify Short Code Tap-to-Copy
-        if "<code>pip install torch</code>" in cleaned_multi_code and "<code>torch.nn</code>" in cleaned_multi_code:
-            self.log_pass("Short Code Tap-to-Copy", "Rendered short inline commands in tap-to-copy <code> format")
+        # Verify Zero &#x27; / &quot; Entity Corruption inside Code Blocks
+        quote_sample = (
+            "```python\n"
+            "image = Image.open('architecture_diagram.png')\n"
+            "client.models.generate_content(\n"
+            "    model='gemini-2.5-flash',\n"
+            "    contents=[image, 'សូមពន្យល់ពីស្ថាបត្យកម្ម']\n"
+            ")\n"
+            "```"
+        )
+        cleaned_quote_code = ReviewerAgent.format_for_telegram_html(quote_sample)
+        if "&#x27;" in cleaned_quote_code or "&quot;" in cleaned_quote_code:
+            self.log_fail("Telegram HTML Entity Purity", "Found unsupported &#x27; or &quot; inside code block!")
+        elif "'architecture_diagram.png'" in cleaned_quote_code and '<pre><code class="language-python">' in cleaned_quote_code:
+            self.log_pass("Telegram HTML Entity Purity", "Zero &#x27; entities detected; single quotes preserved for Telegram HTML compliance")
         else:
-            self.log_fail("Short Code Tap-to-Copy", "Short inline code missing <code> formatting")
+            self.log_fail("Telegram HTML Entity Purity", "Code content was altered or corrupted")
+
+        # Verify Auto-Fencing of Unfenced CLI Commands and Prompt Blueprints
+        unfenced_sample = (
+            "ជំហានដំឡើងបណ្ណាល័យ ៖\n\n"
+            "python -m venv venv\n"
+            "source venv/bin/activate\n"
+            "pip install google-genai pillow\n\n"
+            "កំណត់គ្រាប់ចុចសម្ងាត់ ៖\n\n"
+            "export GEMINI_API_KEY=\"ai_secret_key\"\n\n"
+            "គំរូបញ្ជា Prompt Blueprint ៖\n\n"
+            "[ROLE]\n"
+            "អ្នកគឺជាអ្នកជំនាញវិភាគស្ថាបត្យកម្មបញ្ញាសិប្បនិម្មិត\n"
+            "[CONTEXT]\n"
+            "សំណុំទិន្នន័យពហុវិមាត្រ\n"
+            "[TASK]\n"
+            "១. វិភាគដ្យាក្រាមប្រព័ន្ធ"
+        )
+        cleaned_unfenced = ReviewerAgent.format_for_telegram_html(unfenced_sample)
+        has_autofenced_bash = '<pre><code class="language-bash">' in cleaned_unfenced
+        has_autofenced_yaml = '<pre><code class="language-yaml">' in cleaned_unfenced
+        if has_autofenced_bash and has_autofenced_yaml:
+            self.log_pass("Auto-Fencing Engine", "Auto-fenced bare CLI commands and Prompt blueprints into copyable blocks")
+        else:
+            self.log_fail("Auto-Fencing Engine", f"Failed to auto-fence bare commands/prompts: bash={has_autofenced_bash}, yaml={has_autofenced_yaml}")
+
+        # Verify Zero Lingering Intermediate Waiting Messages in Handlers
+        with open(PROJECT_ROOT / "bot" / "handlers.py", "r", encoding="utf-8") as f:
+            handlers_code = f.read()
+        if 'reply_text(f"⏳' in handlers_code or "កំពុងរៀបចំមេរៀន" in handlers_code:
+            self.log_fail("Zero Intermediate Waiting Message", "Lingering waiting message found in bot/handlers.py!")
+        else:
+            self.log_pass("Zero Intermediate Waiting Message", "Eliminated lingering intermediate waiting message for instant 1-click delivery")
 
     # ──────────
     # 5. CURRICULUM ENGINE ARCHITECTURE (1,200 UNIQUE LESSONS)

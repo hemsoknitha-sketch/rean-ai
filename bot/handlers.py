@@ -83,14 +83,30 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
-    """Splits long text (>3900 chars) into clean paragraph chunks so no text is ever truncated."""
-    max_len = 3900
-    if len(text) <= max_len:
+    """Splits long text into clean paragraph chunks and ensures bulletproof HTML rendering."""
+    import html as py_html
+    max_len = 4000
+
+    def heal_html(raw_html: str) -> str:
+        """Heals common HTML parsing pitfalls for Telegram Bot API."""
+        return (
+            raw_html.replace("&#x27;", "'")
+            .replace("&#39;", "'")
+            .replace("&apos;", "'")
+            .replace("&quot;", '"')
+        )
+
+    async def safe_reply(chunk: str, markup=None):
+        healed_chunk = heal_html(chunk)
         try:
-            await target_msg.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-        except Exception:
-            plain_text = re.sub(r"<[^>]+>", "", text)
-            await target_msg.reply_text(plain_text, reply_markup=reply_markup)
+            await target_msg.reply_text(healed_chunk, parse_mode=ParseMode.HTML, reply_markup=markup)
+        except Exception as html_err:
+            logger.warning(f"Telegram HTML parse failed: {html_err}. Attempting plain-text fallback.")
+            clean_plain = py_html.unescape(re.sub(r"<[^>]+>", "", chunk))
+            await target_msg.reply_text(clean_plain, reply_markup=markup)
+
+    if len(text) <= max_len:
+        await safe_reply(text, reply_markup=reply_markup)
         return
 
     # Split into paragraph chunks safely
@@ -115,11 +131,7 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
     for i, chunk in enumerate(chunks):
         is_last = (i == len(chunks) - 1)
         m_markup = reply_markup if is_last else None
-        try:
-            await target_msg.reply_text(chunk, parse_mode=ParseMode.HTML, reply_markup=m_markup)
-        except Exception:
-            plain_text = re.sub(r"<[^>]+>", "", chunk)
-            await target_msg.reply_text(plain_text, reply_markup=m_markup)
+        await safe_reply(chunk, markup=m_markup)
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -949,8 +961,20 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         cache_lang_key = f"km_{learning_mode}"
         cached_sanitized = LessonCache.get(course_key, lesson_num, lang=cache_lang_key)
 
+        # Invalidate broken/corrupted cache entries from previous runs
+        if cached_sanitized:
+            if "&#x27;" in cached_sanitized or "&quot;" in cached_sanitized or "<pre><code" not in cached_sanitized:
+                logger.warning(f"Invalidating corrupted cached lesson for {course_key}:{lesson_num}")
+                cached_sanitized = None
+
+        # Clean 1-click UX: Instant acknowledgement without lingering chat messages
+        try:
+            await query.answer()
+        except Exception:
+            pass
+
+        # Native non-intrusive typing activity in chat header (no chat message bubbles)
         if not cached_sanitized:
-            status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន ({learning_mode.capitalize()} Mode)៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
             await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
         try:

@@ -21,6 +21,67 @@ class ReviewerAgent:
         if not text:
             return ""
 
+        # 0. Helper: Telegram HTML Code Escaping (Strictly &lt;, &gt;, &amp; ONLY)
+        # NEVER escape single quotes (') into &#x27; or double quotes (") into &quot; inside code
+        # because Telegram Bot API strictly rejects &#x27; with BadRequest, and raw ' and " are 100% valid!
+        def escape_telegram_code(content: str) -> str:
+            # Unescape any preexisting entities first to prevent double-escaping
+            c = (
+                content.replace("&#x27;", "'")
+                .replace("&#39;", "'")
+                .replace("&apos;", "'")
+                .replace("&quot;", '"')
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+            )
+            # Re-escape only &, <, >
+            return (
+                c.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+            )
+
+        # 0b. Auto-fence unfenced CLI commands, prompts, or Python scripts outside existing ```
+        def auto_fence_unfenced_blocks(raw_text: str) -> str:
+            parts = raw_text.split("```")
+            for i in range(0, len(parts), 2):
+                paragraphs = parts[i].split("\n\n")
+                new_paragraphs = []
+                for p in paragraphs:
+                    p_strip = p.strip()
+                    lines = [l.strip() for l in p_strip.splitlines() if l.strip()]
+                    if not lines:
+                        new_paragraphs.append(p)
+                        continue
+
+                    # Check if paragraph is purely CLI commands (e.g. python -m, pip install, export, source, etc.)
+                    cli_starters = (
+                        "python -m", "python3 -m", "pip install", "pip3 install",
+                        "source ", "export ", "git clone", "npm install", "sudo apt", "curl "
+                    )
+                    if all(any(l.startswith(cs) for cs in cli_starters) or l.startswith("#") for l in lines) and len(lines) >= 1:
+                        new_paragraphs.append(f"```bash\n{p_strip}\n```")
+                        continue
+
+                    # Check if paragraph is a structured Prompt Blueprint ([ROLE], [CONTEXT], [TASK], [CONSTRAINTS])
+                    prompt_starters = ("[ROLE]", "[CONTEXT]", "[TASK]", "[CONSTRAINTS]", "[PROMPT]", "[SYSTEM]", "Role:", "System Prompt:")
+                    if any(lines[0].startswith(ps) for ps in prompt_starters):
+                        new_paragraphs.append(f"```yaml\n{p_strip}\n```")
+                        continue
+
+                    # Check if paragraph is purely Python script
+                    py_starters = ("import ", "from ", "def ", "class ", "client = genai.Client()", "# TODO:")
+                    if lines[0].startswith(py_starters) and any(kw in p_strip for kw in ["client = genai", "print(", "models.generate_content"]):
+                        new_paragraphs.append(f"```python\n{p_strip}\n```")
+                        continue
+
+                    new_paragraphs.append(p)
+                parts[i] = "\n\n".join(new_paragraphs)
+            return "```".join(parts)
+
+        text = auto_fence_unfenced_blocks(text)
+
         # 1. Save code blocks (```python ... ```) -> <pre><code class="language-python">...</code></pre>
         code_blocks = []
         def auto_detect_language(code_str: str) -> str:
@@ -44,7 +105,7 @@ class ReviewerAgent:
 
         def save_code_block(match):
             lang = match.group(1).strip().lower()
-            code_content = html.escape(match.group(2).strip())
+            code_content = escape_telegram_code(match.group(2).strip())
             if not lang:
                 lang = auto_detect_language(code_content)
             code_blocks.append(f'<pre><code class="language-{lang}">{code_content}</code></pre>')
@@ -55,7 +116,7 @@ class ReviewerAgent:
         # 2. Save inline code (`code`) -> <code>code</code> (Telegram Tap-to-Copy)
         inline_codes = []
         def save_inline_code(match):
-            code_content = html.escape(match.group(1).strip())
+            code_content = escape_telegram_code(match.group(1).strip())
             if code_content:
                 inline_codes.append(f"<code>{code_content}</code>")
                 return f"@@@INLINECODE{len(inline_codes)-1}@@@"
@@ -68,6 +129,13 @@ class ReviewerAgent:
         text = "\n".join(line.rstrip() for line in text.splitlines())
 
         # 3. Escape HTML special characters for remaining prose
+        # First normalize any erroneous entities from LLM
+        text = (
+            text.replace("&#x27;", "'")
+            .replace("&#39;", "'")
+            .replace("&apos;", "'")
+            .replace("&quot;", '"')
+        )
         text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
         # 4. Super Smart Foreign Script Purge (outside code blocks)
