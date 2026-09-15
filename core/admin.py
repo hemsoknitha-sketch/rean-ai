@@ -5,6 +5,7 @@ import shutil
 import logging
 import urllib.request
 import json
+import html as py_html
 from typing import Dict, List, Any
 import psutil
 
@@ -97,8 +98,6 @@ class SystemMonitor:
 
         SystemMonitor.active_users.add(user.id)
 
-
-        import html as py_html
         user_name = py_html.escape(user.first_name or "Anonymous")
         username_str = f" (@{py_html.escape(user.username)})" if user.username else ""
         engine_name = "🤖 Local Trained Model" if Config.USE_LOCAL_MODEL else "⚡ Gemini 3.6 Flash"

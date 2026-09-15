@@ -1,4 +1,5 @@
 """Telegram Bot Command and Message Handlers with Interactive AI Course, 100-Lesson Curriculum Engine, & Super Admin Suite."""
+import html as py_html
 import re
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -84,7 +85,6 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
     """Splits long text into clean paragraph chunks and ensures bulletproof HTML rendering."""
-    import html as py_html
     max_len = 4000
 
     def heal_html(raw_html: str) -> str:
@@ -107,14 +107,15 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
 
         return re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, h)
 
-    async def safe_reply(chunk: str, markup=None):
+    async def safe_reply(chunk: str, reply_markup=None, markup=None):
+        effective_markup = reply_markup if reply_markup is not None else markup
         healed_chunk = heal_html(chunk)
         try:
-            await target_msg.reply_text(healed_chunk, parse_mode=ParseMode.HTML, reply_markup=markup)
+            await target_msg.reply_text(healed_chunk, parse_mode=ParseMode.HTML, reply_markup=effective_markup)
         except Exception as html_err:
             logger.warning(f"Telegram HTML parse failed: {html_err}. Attempting plain-text fallback.")
             clean_plain = py_html.unescape(re.sub(r"<[^>]+>", "", chunk))
-            await target_msg.reply_text(clean_plain, reply_markup=markup)
+            await target_msg.reply_text(clean_plain, reply_markup=effective_markup)
 
     if len(text) <= max_len:
         await safe_reply(text, reply_markup=reply_markup)
@@ -142,7 +143,7 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
     for i, chunk in enumerate(chunks):
         is_last = (i == len(chunks) - 1)
         m_markup = reply_markup if is_last else None
-        await safe_reply(chunk, markup=m_markup)
+        await safe_reply(chunk, reply_markup=m_markup)
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

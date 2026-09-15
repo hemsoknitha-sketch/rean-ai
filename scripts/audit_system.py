@@ -362,6 +362,27 @@ content: Master AI prompt template
         else:
             self.log_fail("HTML Tag Gatekeeper", f"Unexpected tag sanitization output: {gatekeeper_cleaned}")
 
+        # Verify send_long_message reply_markup Parameter & Async Execution
+        import asyncio
+        from bot.handlers import send_long_message
+
+        class MockMessage:
+            def __init__(self):
+                self.replies = []
+            async def reply_text(self, text, parse_mode=None, reply_markup=None):
+                self.replies.append({"text": text, "parse_mode": parse_mode, "reply_markup": reply_markup})
+
+        mock_msg = MockMessage()
+        test_markup = {"inline_keyboard": [[{"text": "Next", "callback_data": "next"}]]}
+        try:
+            asyncio.run(send_long_message(mock_msg, "<b>សួស្តី</b> Telegram", reply_markup=test_markup))
+            if len(mock_msg.replies) == 1 and mock_msg.replies[0]["reply_markup"] == test_markup:
+                self.log_pass("send_long_message Markup Integrity", "send_long_message seamlessly delivers reply_markup without TypeError")
+            else:
+                self.log_fail("send_long_message Markup Integrity", f"Unexpected reply structure: {mock_msg.replies}")
+        except Exception as e:
+            self.log_fail("send_long_message Markup Integrity", f"send_long_message raised exception: {e}")
+
     # ──────────
     # 5. CURRICULUM ENGINE ARCHITECTURE (1,200 UNIQUE LESSONS)
     # ──────────
