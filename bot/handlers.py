@@ -914,7 +914,10 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
     """Handles interactive button taps for course selection, admin controls, and lesson execution."""
     query = update.callback_query
-    await query.answer()
+    try:
+        await query.answer()
+    except Exception as ans_err:
+        logger.debug(f"Callback answer notice: {ans_err}")
     data = query.data
 
     parts = data.split(":")
@@ -978,7 +981,10 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         user_state.set_learning_mode(applied_mode)
 
         mode_label = "⚡ របៀបសូក្រាតអន្តរកម្ម (Interactive Socratic)" if applied_mode == "socratic" else "📘 របៀបពន្យល់ក្បោះក្បាយ (Explanatory)"
-        await query.answer(f"បានកំណត់៖ {mode_label}", show_alert=False)
+        try:
+            await query.answer(f"បានកំណត់៖ {mode_label}", show_alert=False)
+        except Exception:
+            pass
         await study_command(update, context)
 
     elif action == "study_profile":
@@ -1277,8 +1283,20 @@ def setup_handlers(application: Application) -> None:
 
     application.add_handler(CallbackQueryHandler(handle_callback_query))
 
-
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    application.add_error_handler(global_error_handler)
+
+
+async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Catches unhandled errors and logs them gracefully without system disruption."""
+    err = context.error
+    if "Query is too old" in str(err) or "query id is invalid" in str(err):
+        logger.debug(f"Expired callback query safely ignored: {err}")
+    elif "httpx.ReadError" in str(err) or "NetworkError" in str(err):
+        logger.warning(f"Telegram network transient event: {err}")
+    else:
+        logger.error(f"Telegram update caused error: {err}", exc_info=context.error)
 
 
 
