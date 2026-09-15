@@ -352,6 +352,16 @@ content: Master AI prompt template
         else:
             self.log_pass("Zero Intermediate Waiting Message", "Eliminated lingering intermediate waiting message for instant 1-click delivery")
 
+        # Verify HTML Tag Gatekeeper Sanitizes Unsupported Tags (e.g. <locals>, <something>)
+        unsupported_tags_sample = "**ចំណងជើង** <locals> គំនិត <custom_tag>\n\n```python\nx = 1\n```"
+        gatekeeper_cleaned = ReviewerAgent.format_for_telegram_html(unsupported_tags_sample)
+        if "<locals>" in gatekeeper_cleaned or "<custom_tag>" in gatekeeper_cleaned:
+            self.log_fail("HTML Tag Gatekeeper", "Unsupported HTML tags leaked into Telegram output!")
+        elif "&lt;locals&gt;" in gatekeeper_cleaned and "&lt;custom_tag&gt;" in gatekeeper_cleaned and "<b>ចំណងជើង</b>" in gatekeeper_cleaned and '<pre><code class="language-python">' in gatekeeper_cleaned:
+            self.log_pass("HTML Tag Gatekeeper", "Sanitized unsupported HTML tags (<locals>) into safe entities while preserving valid tags")
+        else:
+            self.log_fail("HTML Tag Gatekeeper", f"Unexpected tag sanitization output: {gatekeeper_cleaned}")
+
     # ──────────
     # 5. CURRICULUM ENGINE ARCHITECTURE (1,200 UNIQUE LESSONS)
     # ──────────

@@ -204,6 +204,19 @@ class ReviewerAgent:
         # 15. Final typographic pass: Clean up excessive blank lines around code blocks
         text = re.sub(r"\n{3,}", "\n\n", text)
 
+        # 16. Telegram HTML Tag Gatekeeper: Escape any unsupported tags (e.g. <locals>, <custom>)
+        allowed_tags = {
+            "b", "strong", "i", "em", "u", "ins", "s", "strike", "del",
+            "span", "tg-spoiler", "a", "code", "pre", "blockquote", "tg-emoji"
+        }
+        def replace_unsupported_tag(m):
+            tag_name = m.group(1).lower()
+            if tag_name in allowed_tags:
+                return m.group(0)
+            return m.group(0).replace("<", "&lt;").replace(">", "&gt;")
+
+        text = re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, text)
+
         return text.strip()
 
     def validate_and_sanitize(self, text: str, strict: bool = True) -> str:

@@ -98,16 +98,18 @@ class SystemMonitor:
         SystemMonitor.active_users.add(user.id)
 
 
-        user_name = user.first_name or "Anonymous"
-        username_str = f" (@{user.username})" if user.username else ""
+        import html as py_html
+        user_name = py_html.escape(user.first_name or "Anonymous")
+        username_str = f" (@{py_html.escape(user.username)})" if user.username else ""
         engine_name = "🤖 Local Trained Model" if Config.USE_LOCAL_MODEL else "⚡ Gemini 3.6 Flash"
+        escaped_query = py_html.escape(str(query))
 
         header = (
             f"🔔 <b>VIP USER LIVE ACTIVITY ALERT</b>\n"
             f"━━━━━━━━━━\n"
             f"👤 <b>User:</b> {user_name}{username_str} [ID: <code>{user.id}</code>]\n"
             f"⚙️ <b>Engine:</b> {engine_name}\n\n"
-            f"💬 <b>User Query:</b>\n<i>{query}</i>\n\n"
+            f"💬 <b>User Query:</b>\n<i>{escaped_query}</i>\n\n"
             f"🤖 <b>AI Full Response:</b>\n"
         )
 

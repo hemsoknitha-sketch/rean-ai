@@ -89,12 +89,23 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
 
     def heal_html(raw_html: str) -> str:
         """Heals common HTML parsing pitfalls for Telegram Bot API."""
-        return (
+        h = (
             raw_html.replace("&#x27;", "'")
             .replace("&#39;", "'")
             .replace("&apos;", "'")
             .replace("&quot;", '"')
         )
+        allowed_tags = {
+            "b", "strong", "i", "em", "u", "ins", "s", "strike", "del",
+            "span", "tg-spoiler", "a", "code", "pre", "blockquote", "tg-emoji"
+        }
+        def replace_unsupported_tag(m):
+            tag_name = m.group(1).lower()
+            if tag_name in allowed_tags:
+                return m.group(0)
+            return m.group(0).replace("<", "&lt;").replace(">", "&gt;")
+
+        return re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, h)
 
     async def safe_reply(chunk: str, markup=None):
         healed_chunk = heal_html(chunk)
@@ -1034,8 +1045,9 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
         except Exception as err:
             logger.error(f"Failed to generate lesson {lesson_title}: {err}", exc_info=True)
+            escaped_err = py_html.escape(str(err))
             await query.message.reply_text(
-                f"⚠️ <b>មានបញ្ហាក្នុងការទាញយកមេរៀន៖</b> {err}\n\nសូមព្យាយាមចុចរៀនម្តងទៀត ឬជ្រើសរើសមេរៀនផ្សេង។",
+                f"⚠️ <b>មានបញ្ហាក្នុងការទាញយកមេរៀន៖</b> {escaped_err}\n\nសូមព្យាយាមចុចរៀនម្តងទៀត ឬជ្រើសរើសមេរៀនផ្សេង។",
                 parse_mode=ParseMode.HTML
             )
 
