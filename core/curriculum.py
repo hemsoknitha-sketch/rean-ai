@@ -61,6 +61,52 @@ AI_COURSES: Dict[str, Dict[str, str]] = {
         "title": "AI Security, Safety & Red Teaming",
         "emoji": "🛡️",
         "desc": "រៀនសូត្រពី Prompt Injection Attacks, Jailbreak Defenses, OWASP for LLMs, និង System Guardrails"
+    },
+    "frontier4": {
+        "title": "The Big 4 Frontier AI (ChatGPT, Gemini, DeepSeek, Grok)",
+        "emoji": "🧠",
+        "desc": "ស្ទាត់ជំនាញកំពូលម៉ូឌែលទាំង ៤ (GPT-4o, Gemini 2.5, DeepSeek-R1, Grok 2/3)"
+    },
+    "creative": {
+        "title": "Creative Media Studio (Images, Video, Music)",
+        "emoji": "🎨",
+        "desc": "ផលិតរូបភាព Midjourney/Flux, វីដេអូ Sora/Kling, និងចម្រៀង Suno/Udio"
+    },
+    "auto_agents": {
+        "title": "AI Automation & Autonomous Agents (Autonomous Personal Assistant)",
+        "emoji": "⚙️",
+        "desc": "n8n, Telegram Bots, Workspace AI, និងជំនួយការស្វ័យប្រវត្តិកម្រិតសហគ្រាស"
+    }
+}
+
+FAST_TRACK_COURSES: Dict[str, Dict[str, str]] = {
+    "prompting": {
+        "track_num": 1,
+        "title": "វិស្វកម្ម Prompting កម្រិតខ្ពស់ (Prompt Engineering & Reasoning)",
+        "emoji": "⚡",
+        "desc": "CREATE Framework, In-Context Learning, CoT Reasoning, និង Meta-Prompting",
+        "lessons_count": 100
+    },
+    "frontier4": {
+        "track_num": 2,
+        "title": "The Big 4 Frontier AI (ChatGPT, Gemini, DeepSeek, Grok)",
+        "emoji": "🧠",
+        "desc": "ស្ទាត់ជំនាញកំពូលម៉ូឌែលទាំង ៤ (GPT-4o, Gemini 2.5, DeepSeek-R1, Grok 2/3)",
+        "lessons_count": 100
+    },
+    "creative": {
+        "track_num": 3,
+        "title": "Creative Media Studio (Images, Video, Music)",
+        "emoji": "🎨",
+        "desc": "ផលិតរូបភាព Midjourney/Flux, វីដេអូ Sora/Kling, និងចម្រៀង Suno/Udio",
+        "lessons_count": 100
+    },
+    "auto_agents": {
+        "track_num": 4,
+        "title": "AI Automation & Autonomous Agents (Autonomous Personal Assistant)",
+        "emoji": "⚙️",
+        "desc": "n8n, Telegram Bots, Workspace AI, និងជំនួយការស្វ័យប្រវត្តិកម្រិតសហគ្រាស",
+        "lessons_count": 100
     }
 }
 
@@ -210,6 +256,42 @@ AI_COURSE_MODULES: Dict[str, List[str]] = {
         "Denial of Service (DoS) & Resource Exhaustion Defenses",
         "Secure AI Integration: IAM, API Key Vaults & Sandboxing",
         "Capstone: Fortress-Grade Enterprise AI Defense Architecture"
+    ],
+    "frontier4": [
+        "ChatGPT & GPT-4o ស្ថាបត្យកម្មស្នូល (Assistants API, Code Interpreter & Canvas)",
+        "Custom GPTs, Advanced Data Analysis & Voice Mode ក្នុង OpenAI Ecosystem",
+        "Google Gemini 2.5/Flash & Native Multimodal Ingestion (រូបភាព សំឡេង វីដេអូ PDF)",
+        "Gemini Long-Context (2M Tokens), Context Caching & Grounding with Google Search",
+        "DeepSeek-V3 ស្ថាបត្យកម្មស្នូល, Open-Weights Economics & MoE Efficiency",
+        "DeepSeek-R1 Reasoning Engine (Test-Time Compute, Reasoning Traces & Coding)",
+        "xAI Grok 2/3 & Real-Time Search លើបណ្តាញ X (Twitter Intelligence)",
+        "Grok Fun Mode, Uncensored Analysis & Flux.1 Image Generation Integration",
+        "Cross-Model Evaluation & Synthesis (ការប្រៀបធៀប និងជ្រើសរើស Model សមស្របតាមការងារ)",
+        "Capstone: Multi-Model Enterprise Workflow (ChatGPT + Gemini + DeepSeek + Grok)"
+    ],
+    "creative": [
+        "Midjourney v6 Master Prompting (Cinematic Lighting, Camera Angles & Aspect Ratios)",
+        "Flux.1 & Stable Diffusion XL (Photorealism, Typography & Negative Prompts)",
+        "ComfyUI Modular Node Architecture & ControlNet (Pose, Canny Edge, Depth)",
+        "LoRA Training & Precision Editing (Image-to-Image, Inpainting & Outpainting)",
+        "AI Video Foundations (Sora, Runway Gen-3 & Kling AI Architecture)",
+        "Cinematic Camera Controls, Motion Brush & Video Consistency",
+        "AI Lip-Syncing, Talking Avatars (HeyGen, LivePortrait) & Faceless Video",
+        "AI Music Generation Foundations (Suno v3 & Udio Architecture)",
+        "Full Song Production ជាមួយ Suno (Lyrics Structure, Verses, Choruses & Moods)",
+        "Capstone: Complete Media Production Suite (Art, Music & Cinematic Video Pipeline)"
+    ],
+    "auto_agents": [
+        "គោលការណ៍ AI Automation & No-Code/Low-Code Architecture",
+        "n8n Self-Hosted Setup, Webhooks & Workflow Orchestration",
+        "Make.com Scenarios (Router Logic, Payload Transformation & Error Handling)",
+        "Telegram Bot Integration ជាមួយ AI (ឆ្លើយតបអតិថិជន និងកត់ត្រាទិន្នន័យស្វ័យប្រវត្តិ)",
+        "Google Workspace AI Automation (Gmail Support, Google Sheets & Calendar Sync)",
+        "Autonomous Agents & ReAct Framework (Perception, Planning, Memory & Tools)",
+        "LangChain & Multi-Agent Swarms (CrewAI) សម្រាប់ដោះស្រាយកិច្ចការស្មុគស្មាញ",
+        "Tool Execution & Web Scraping (បំពាក់ឱ្យ Agent ស្វែងរកព័ត៌មានលើ Internet)",
+        "Personal Autonomous Executive Assistant (រៀបចំកាលវិភាគ សង្ខេបព័ត៌មាន និងរំលឹកកិច្ចការពេញម៉ោង)",
+        "Capstone: Fully Autonomous Enterprise Business & Personal Operations Suite"
     ]
 }
 
@@ -234,6 +316,11 @@ class CurriculumEngine:
     def get_course_list() -> List[Tuple[str, str, str]]:
         """Returns list of (course_key, title, emoji)."""
         return [(k, v["title"], v["emoji"]) for k, v in AI_COURSES.items()]
+
+    @staticmethod
+    def get_fast_track_courses() -> List[Tuple[str, str, str, str]]:
+        """Returns list of (course_key, title, emoji, desc) for the 4 Fast-Track Masterclass courses."""
+        return [(k, v["title"], v["emoji"], v["desc"]) for k, v in FAST_TRACK_COURSES.items()]
 
     @staticmethod
     def get_lesson_title(course_key: str, lesson_num: int, lang: str = "km") -> str:

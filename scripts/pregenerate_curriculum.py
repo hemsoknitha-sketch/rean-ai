@@ -192,9 +192,12 @@ def main():
 
     if args.course.lower() == "all":
         target_courses = list(AI_COURSES.keys())
+    elif args.course.lower() in ("fasttrack", "fast_track", "fast-track"):
+        from core.curriculum import FAST_TRACK_COURSES
+        target_courses = list(FAST_TRACK_COURSES.keys())
     else:
         if args.course.lower() not in AI_COURSES:
-            print(f"Error: Unknown course '{args.course}'. Available: {list(AI_COURSES.keys())}")
+            print(f"Error: Unknown course '{args.course}'. Available: {list(AI_COURSES.keys()) + ['fasttrack']}")
             sys.exit(1)
         target_courses = [args.course.lower()]
 

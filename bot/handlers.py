@@ -65,7 +65,7 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     text = (
         "🔒 <b>ការកម្រិតសិទ្ធិ ៖ ទាមទារអាជ្ញាប័ណ្ណ VIP MEMBERSHIP</b>\n"
         "━━━━━━━━━━\n"
-        "ដើម្បីចូលរៀនមេរៀន AI Masterclasses ទាំង ៧០០ មេរៀន និងប្រើប្រាស់ AI Cognitive Engine សូមធ្វើការដំឡើងគណនីរបស់លោកអ្នកទៅជា <b>VIP Membership</b>។\n\n"
+        "ដើម្បីចូលរៀនមេរៀន AI Masterclasses (៤០០ មេរៀនអនុវត្តជាក់ស្តែង និង ១,២០០ មេរៀនកម្រិតស្ថាបត្យករកំពូល) ព្រមទាំងប្រើប្រាស់ Supreme AI Cognitive Engine សូមធ្វើការដំឡើងគណនីរបស់លោកអ្នកទៅជា <b>VIP Membership</b>។\n\n"
         f"👤 <b>ឈ្មោះ ៖</b> {user.first_name}\n"
         f"🆔 <b>លេខ Telegram ID របស់លោកអ្នក ៖</b> <code>{user.id}</code>\n\n"
         "📩 <b>ទំនាក់ទំនងដើម្បីជាវ ឬបើកសិទ្ធិអាជ្ញាប័ណ្ណ VIP ៖</b>\n"
@@ -249,21 +249,60 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Handles /ai or /courses command to display interactive AI learning menu."""
+    """Handles /ai or /courses command to display interactive AI learning menu with Fast-Track 400."""
     if not await check_vip_access(update, context):
         return
 
     text = (
-        "<b>🎓 បញ្ជី AI Master Courses (១០០ មេរៀន / 100 Lessons in 1 AI Topic)</b>\n\n"
-        "សូមជ្រើសរើសជំនាញ AI ដែលលោកអ្នកចង់រៀនសូត្រពីកម្រិតដំបូង រហូតដល់កម្រិត Grandmaster ៖"
+        "💎 <b>ស្ថាបត្យកម្ម AI វិស្វករស្ថាបត្យករកម្រិតកំពូល (APEX VIP AI ACADEMY)</b>\n"
+        "──────────\n"
+        "👤 <b>ស្ថានភាពគណនី ៖</b> 💎 សមាជិក VIP ជាន់ខ្ពស់ (VIP Authorized)\n"
+        "✨ <b>សិទ្ធិពិសេស ៖</b> ចូលរៀនគ្រប់មេរៀនដោយសេរី គ្មានដែនកំណត់ ២៤/៧\n\n"
+        "🚀 <b>កម្មវិធីល្បឿនលឿនអនុវត្តជាក់ស្តែង ៤០០ មេរៀនស្នូល (Fast-Track 400) ៖</b>\n"
+        "សូមជ្រើសរើសវគ្គសិក្សាដើម្បីចាប់ផ្តើមរៀនសូត្រពីកម្រិតដំបូងដល់កំពូល ៖"
+    )
+
+    keyboard = [
+        [InlineKeyboardButton("⚡ វគ្គ ១ ៖ Prompt Engineering (១០០ មេរៀន)", callback_data="course:prompting:1")],
+        [InlineKeyboardButton("🧠 វគ្គ ២ ៖ The Big 4: ChatGPT, Gemini, DeepSeek, Grok (១០០ មេរៀន)", callback_data="course:frontier4:1")],
+        [InlineKeyboardButton("🎨 វគ្គ ៣ ៖ Creative Media: Images, Video, Music (១០០ មេរៀន)", callback_data="course:creative:1")],
+        [InlineKeyboardButton("⚙️ វគ្គ ៤ ៖ AI Automation & Autonomous Agents (១០០ មេរៀន)", callback_data="course:auto_agents:1")],
+        [InlineKeyboardButton("📚 បញ្ជីមេរៀនឯកទេសស៊ីជម្រៅទាំង ១,២០០ (Full Catalog)", callback_data="courses_full_catalog")],
+        [InlineKeyboardButton("🎓 មើលកាតពិន្ទុ និងរបៀបសិក្សា (/study)", callback_data="study_profile")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.callback_query:
+        try:
+            await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+        except Exception:
+            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
+
+async def ai_courses_full_catalog_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Displays the full catalog of all specialized AI courses."""
+    if not await check_vip_access(update, context):
+        return
+
+    text = (
+        "📚 <b>បញ្ជីមេរៀនឯកទេសស៊ីជម្រៅទាំង ១,២០០ (Full Enterprise Catalog)</b>\n"
+        "──────────\n"
+        "សូមជ្រើសរើសជំនាញឯកទេសដែលលោកអ្នកចង់សិក្សាស៊ីជម្រៅ ៖"
     )
     keyboard = []
     for key, info in AI_COURSES.items():
         keyboard.append([InlineKeyboardButton(f"{info['emoji']} {info['title']}", callback_data=f"course:{key}:1")])
+
+    keyboard.append([InlineKeyboardButton("◀ ត្រឡប់ទៅកម្មវិធីល្បឿនលឿន ៤០០ មេរៀនស្នូល", callback_data="courses_list")])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     if update.callback_query:
-        await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+        try:
+            await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+        except Exception:
+            await update.callback_query.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
     else:
         await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
@@ -992,6 +1031,9 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
 
     elif action == "courses_list":
         await ai_courses_command(update, context)
+
+    elif action == "courses_full_catalog":
+        await ai_courses_full_catalog_command(update, context)
 
     elif action == "lesson":
         course_key = parts[1]

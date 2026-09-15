@@ -420,21 +420,28 @@ content: Master AI prompt template
         print("\n5. AUDITING CURRICULUM: 1,200 DISTINCT LESSONS & 6-PILLAR ARCHITECTURE")
         print("──────────")
 
-        # Verify 12 courses
-        if len(AI_COURSES) == 12:
-            self.log_pass("AI Courses Count", "Exactly 12 AI specialized domains configured")
+        # Verify 4 Fast-Track Masterclass Courses
+        from core.curriculum import FAST_TRACK_COURSES
+        if len(FAST_TRACK_COURSES) == 4 and all(c in AI_COURSES for c in FAST_TRACK_COURSES):
+            self.log_pass("Fast-Track 400 Courses", "Exactly 4 Fast-Track courses configured (Prompting, Frontier 4, Creative Studio, Automation & Agents)")
         else:
-            self.log_fail("AI Courses Count", f"Expected 12 courses, found {len(AI_COURSES)}")
+            self.log_fail("Fast-Track 400 Courses", f"Fast-Track configuration error: {len(FAST_TRACK_COURSES)}")
 
-        # Verify 120 dedicated domain modules
-        if len(AI_COURSE_MODULES) == 12:
+        # Verify AI Courses Count
+        if len(AI_COURSES) >= 12:
+            self.log_pass("AI Courses Count", f"Configured {len(AI_COURSES)} AI courses (12 Specialized + Fast-Track Unified Tracks)")
+        else:
+            self.log_fail("AI Courses Count", f"Expected >= 12 courses, found {len(AI_COURSES)}")
+
+        # Verify dedicated domain modules (all courses have exactly 10 modules)
+        if len(AI_COURSE_MODULES) == len(AI_COURSES):
             all_10 = all(len(m) == 10 for m in AI_COURSE_MODULES.values())
             if all_10:
-                self.log_pass("AI Course Modules", "All 12 courses have 10 dedicated domain modules (120 unique modules)")
+                self.log_pass("AI Course Modules", f"All {len(AI_COURSE_MODULES)} courses have 10 dedicated domain modules ({len(AI_COURSE_MODULES)*10} unique modules)")
             else:
                 self.log_fail("AI Course Modules", "Some courses do not have exactly 10 modules!")
         else:
-            self.log_fail("AI Course Modules", f"Expected 12 module mappings, got {len(AI_COURSE_MODULES)}")
+            self.log_fail("AI Course Modules", f"Expected {len(AI_COURSES)} module mappings, got {len(AI_COURSE_MODULES)}")
 
         # Verify 10 distinct subtopic progressions
         if len(LESSON_SUBTOPICS) == 10:
