@@ -74,6 +74,7 @@ class SystemAuditor:
             PROJECT_ROOT / "core" / "novel_continuity.py",
             PROJECT_ROOT / "core" / "student_manager.py",
             PROJECT_ROOT / "memory" / "state_manager.py",
+            PROJECT_ROOT / "scripts" / "pregenerate_curriculum.py",
         ]
 
         for file_path in files_to_check:
