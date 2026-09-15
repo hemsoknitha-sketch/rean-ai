@@ -84,11 +84,11 @@ async def check_vip_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
-    """Splits long text into clean paragraph chunks and ensures bulletproof HTML rendering."""
-    max_len = 4000
+    """Splits long text into clean atomic chunks and ensures bulletproof HTML rendering with zero broken tags."""
+    max_len = 4050
 
-    def heal_html(raw_html: str) -> str:
-        """Heals common HTML parsing pitfalls for Telegram Bot API."""
+    def heal_chunk(raw_html: str) -> str:
+        """Heals common HTML parsing pitfalls and balances tags for Telegram Bot API."""
         h = (
             raw_html.replace("&#x27;", "'")
             .replace("&#39;", "'")
@@ -105,11 +105,12 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
                 return m.group(0)
             return m.group(0).replace("<", "&lt;").replace(">", "&gt;")
 
-        return re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, h)
+        sanitized = re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, h)
+        return ReviewerAgent.balance_html_tags(sanitized)
 
     async def safe_reply(chunk: str, reply_markup=None, markup=None):
         effective_markup = reply_markup if reply_markup is not None else markup
-        healed_chunk = heal_html(chunk)
+        healed_chunk = heal_chunk(chunk)
         try:
             await target_msg.reply_text(healed_chunk, parse_mode=ParseMode.HTML, reply_markup=effective_markup)
         except Exception as html_err:
@@ -121,21 +122,47 @@ async def send_long_message(target_msg, text: str, reply_markup=None) -> None:
         await safe_reply(text, reply_markup=reply_markup)
         return
 
-    # Split into paragraph chunks safely
-    paragraphs = text.split("\n\n")
+    # Atomic Unit Splitting: Never split inside <pre><code ...>...</code></pre> blocks
+    code_block_pattern = re.compile(r"(<pre><code.*?>.*?</code></pre>)", re.DOTALL)
+    parts = code_block_pattern.split(text)
+
+    atomic_units = []
+    for part in parts:
+        if not part:
+            continue
+        if part.startswith("<pre><code") and part.endswith("</code></pre>"):
+            atomic_units.append(part)
+        else:
+            paragraphs = part.split("\n\n")
+            for p in paragraphs:
+                if p.strip():
+                    atomic_units.append(p)
+
     chunks = []
     current_chunk = []
     current_length = 0
 
-    for p in paragraphs:
-        if current_length + len(p) + 2 > max_len:
+    for unit in atomic_units:
+        unit_len = len(unit) + 2
+        if len(unit) > max_len:
+            lines = unit.split("\n")
+            for line in lines:
+                if current_length + len(line) + 1 > max_len:
+                    if current_chunk:
+                        chunks.append("\n\n".join(current_chunk))
+                    current_chunk = [line]
+                    current_length = len(line)
+                else:
+                    current_chunk.append(line)
+                    current_length += len(line) + 1
+        elif current_length + unit_len > max_len:
             if current_chunk:
                 chunks.append("\n\n".join(current_chunk))
-            current_chunk = [p]
-            current_length = len(p)
+            current_chunk = [unit]
+            current_length = len(unit)
         else:
-            current_chunk.append(p)
-            current_length += len(p) + 2
+            current_chunk.append(unit)
+            current_length += unit_len
 
     if current_chunk:
         chunks.append("\n\n".join(current_chunk))
@@ -978,6 +1005,8 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
             if "&#x27;" in cached_sanitized or "&quot;" in cached_sanitized or "<pre><code" not in cached_sanitized:
                 logger.warning(f"Invalidating corrupted cached lesson for {course_key}:{lesson_num}")
                 cached_sanitized = None
+            else:
+                cached_sanitized = ReviewerAgent.balance_html_tags(cached_sanitized)
 
         # Clean 1-click UX: Instant acknowledgement without lingering chat messages
         try:

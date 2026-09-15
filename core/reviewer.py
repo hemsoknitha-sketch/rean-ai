@@ -217,7 +217,57 @@ class ReviewerAgent:
 
         text = re.sub(r"</?([a-zA-Z0-9_\-]+)(?:\s+[^>]*)?>", replace_unsupported_tag, text)
 
-        return text.strip()
+        # 17. Telegram HTML Tag Balancer: Ensure 100% well-formed, balanced HTML for Telegram
+        return ReviewerAgent.balance_html_tags(text.strip())
+
+    @staticmethod
+    def balance_html_tags(html_text: str) -> str:
+        """Balances HTML tags by closing any unclosed tags in reverse order and escaping rogue closing tags."""
+        if not html_text:
+            return ""
+
+        tag_pattern = re.compile(r"<(/)?([a-zA-Z0-9_\-]+)((?:\s+[^>]*)?)>")
+        last_end = 0
+        stack = []
+        balanced_parts = []
+
+        for m in tag_pattern.finditer(html_text):
+            start, end = m.span()
+            text_before = html_text[last_end:start]
+            is_closing = bool(m.group(1))
+            tag_name = m.group(2).lower()
+            full_tag = m.group(0)
+
+            balanced_parts.append(text_before)
+
+            if not is_closing:
+                stack.append((tag_name, full_tag))
+                balanced_parts.append(full_tag)
+            else:
+                match_index = -1
+                for idx in range(len(stack) - 1, -1, -1):
+                    if stack[idx][0] == tag_name:
+                        match_index = idx
+                        break
+                if match_index != -1:
+                    while len(stack) > match_index + 1:
+                        unclosed_tag, _ = stack.pop()
+                        balanced_parts.append(f"</{unclosed_tag}>")
+                    stack.pop()
+                    balanced_parts.append(f"</{tag_name}>")
+                else:
+                    # Rogue closing tag without opening tag -> escape it into safe entity
+                    balanced_parts.append(f"&lt;/{tag_name}&gt;")
+
+            last_end = end
+
+        balanced_parts.append(html_text[last_end:])
+
+        while stack:
+            unclosed_tag, _ = stack.pop()
+            balanced_parts.append(f"</{unclosed_tag}>")
+
+        return "".join(balanced_parts)
 
     def validate_and_sanitize(self, text: str, strict: bool = True) -> str:
         """Sanitizes text and verifies formatting boundaries."""

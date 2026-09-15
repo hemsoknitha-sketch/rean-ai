@@ -378,8 +378,37 @@ content: Master AI prompt template
             asyncio.run(send_long_message(mock_msg, "<b>សួស្តី</b> Telegram", reply_markup=test_markup))
             if len(mock_msg.replies) == 1 and mock_msg.replies[0]["reply_markup"] == test_markup:
                 self.log_pass("send_long_message Markup Integrity", "send_long_message seamlessly delivers reply_markup without TypeError")
+            # Verify HTML Tag Balancer (Unclosed tags auto-closed, rogue closing tags escaped)
+            unclosed_sample = "<b>ចំណងជើង <pre><code class=\"language-python\">x = 1"
+            balanced_out = ReviewerAgent.balance_html_tags(unclosed_sample)
+            rogue_sample = "កូដសម្រេច\n</code></pre>"
+            rogue_out = ReviewerAgent.balance_html_tags(rogue_sample)
+            if balanced_out.endswith("</code></pre></b>") and "&lt;/code&gt;&lt;/pre&gt;" in rogue_out:
+                self.log_pass("HTML Tag Balancer", "Auto-closed unclosed tags and escaped rogue closing tags")
             else:
-                self.log_fail("send_long_message Markup Integrity", f"Unexpected reply structure: {mock_msg.replies}")
+                self.log_fail("HTML Tag Balancer", f"Failed tag balance: balanced='{balanced_out}', rogue='{rogue_out}'")
+
+            # Verify Atomic Code Block Splitting in send_long_message
+            mock_multi = MockMessage()
+            long_content = (
+                "<b>ជំពូកទី ១</b>\n\n"
+                + ("កថាខណ្ឌពន្យល់ទ្រឹស្តីទូទៅ " * 150)
+                + "\n\n<pre><code class=\"language-python\">\ndef train():\n    return True\n</code></pre>\n\n"
+                + ("កថាខណ្ឌបន្តបន្ទាប់ " * 150)
+            )
+            asyncio.run(send_long_message(mock_multi, long_content))
+            all_chunks_balanced = True
+            all_code_intact = True
+            for r in mock_multi.replies:
+                txt = r["text"]
+                if ("<pre>" in txt and "</pre>" not in txt) or ("<code" in txt and "</code>" not in txt):
+                    all_chunks_balanced = False
+                if "<pre><code" in txt and not ("def train():" in txt and "return True" in txt):
+                    all_code_intact = False
+            if len(mock_multi.replies) > 1 and all_chunks_balanced and all_code_intact:
+                self.log_pass("Atomic Code Block Chunking", f"Split {len(mock_multi.replies)} chunks with 100% intact code blocks and balanced tags")
+            else:
+                self.log_fail("Atomic Code Block Chunking", f"Chunking issue: count={len(mock_multi.replies)}, balanced={all_chunks_balanced}, intact={all_code_intact}")
         except Exception as e:
             self.log_fail("send_long_message Markup Integrity", f"send_long_message raised exception: {e}")
 

@@ -49,12 +49,16 @@ class LessonCache:
         cached = cls._cache.get(key)
         if cached:
             logger.info(f"PERSISTENT LESSON CACHE HIT (0.001s Instant) for key: {key}")
+            from core.reviewer import ReviewerAgent
+            cached = ReviewerAgent.balance_html_tags(cached)
         return cached
 
     @classmethod
     def set(cls, course_key: str, lesson_num: int, lang: str, content: str) -> None:
         """Saves generated lesson to persistent disk cache."""
         cls._ensure_loaded()
+        from core.reviewer import ReviewerAgent
+        content = ReviewerAgent.balance_html_tags(content)
         key = f"{course_key}:{lesson_num}:{lang}"
         cls._cache[key] = content
         try:
