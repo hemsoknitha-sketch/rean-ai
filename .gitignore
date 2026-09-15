@@ -5,3 +5,4 @@ __pycache__/
 outputs/
 polymath_ai_model/
 *.gguf
+data/

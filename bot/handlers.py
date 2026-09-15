@@ -28,6 +28,7 @@ from core.security import AntiSpamGuard, PromptInjectionGuard
 from core.user_registry import UserRegistry
 from core.backup_engine import BackupEngine
 from core.novel_continuity import NovelContinuityTracker, KhmerRomanceLexicon
+from core.student_manager import StudentManager
 
 
 
@@ -214,6 +215,37 @@ async def ai_courses_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.callback_query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
     else:
         await update.message.reply_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
+
+async def study_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles /study or /socratic command to view student profile, score, and select learning mode."""
+    user = update.effective_user
+    if not user:
+        return
+
+    # Guarantee student record exists and update activity
+    StudentManager.get_or_create_student(user.id, name=user.first_name or "Student", username=user.username or "")
+    card_html = StudentManager.get_student_card(user.id)
+
+    keyboard = [
+        [
+            InlineKeyboardButton("⚡ របៀបសូក្រាតអន្តរកម្ម (Socratic)", callback_data="study_mode:socratic"),
+            InlineKeyboardButton("📘 របៀបពន្យល់ក្បោះក្បាយ (Explanatory)", callback_data="study_mode:explanatory"),
+        ],
+        [
+            InlineKeyboardButton("🎓 បើកមើល AI Courses (/ai)", callback_data="courses_list"),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if update.callback_query:
+        try:
+            await update.callback_query.message.edit_text(card_html, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+        except Exception:
+            await update.callback_query.message.reply_text(card_html, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(card_html, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
 
 
 
@@ -887,6 +919,20 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
+    elif action == "study_mode":
+        target_mode = parts[1]
+        user = update.effective_user
+        applied_mode = StudentManager.set_learning_mode(user.id, target_mode)
+        user_state = state_manager.get_state(query.message.chat_id)
+        user_state.set_learning_mode(applied_mode)
+
+        mode_label = "⚡ របៀបសូក្រាតអន្តរកម្ម (Interactive Socratic)" if applied_mode == "socratic" else "📘 របៀបពន្យល់ក្បោះក្បាយ (Explanatory)"
+        await query.answer(f"បានកំណត់៖ {mode_label}", show_alert=False)
+        await study_command(update, context)
+
+    elif action == "study_profile":
+        await study_command(update, context)
+
     elif action == "courses_list":
         await ai_courses_command(update, context)
 
@@ -894,21 +940,24 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
         course_key = parts[1]
         lesson_num = int(parts[2])
         chat_id = query.message.chat_id
+        user = update.effective_user
 
+        learning_mode = StudentManager.get_learning_mode(user.id)
         lesson_title = CurriculumEngine.get_lesson_title(course_key, lesson_num, lang="km")
 
         # 1. Check Persistent Disk Lesson Cache (0.001s Instant Response + $0 API Cost)
-        cached_sanitized = LessonCache.get(course_key, lesson_num, lang="km")
+        cache_lang_key = f"km_{learning_mode}"
+        cached_sanitized = LessonCache.get(course_key, lesson_num, lang=cache_lang_key)
 
         if not cached_sanitized:
-            status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
+            status_msg = await query.message.reply_text(f"⏳ <b>កំពុងរៀបចំមេរៀន ({learning_mode.capitalize()} Mode)៖ {lesson_title}...</b>", parse_mode=ParseMode.HTML)
             await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
         try:
             if cached_sanitized:
                 sanitized = cached_sanitized
             else:
-                prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km")
+                prompt = CurriculumEngine.generate_lesson_prompt(course_key, lesson_num, lang="km", mode=learning_mode)
                 user_state = state_manager.get_state(chat_id)
                 intent = evaluator_agent.analyze(prompt)
 
@@ -919,18 +968,28 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
                     sanitized = f"📘 <b>{lesson_title}</b>\n\nប្រព័ន្ធកំពុងរៀបចំខ្លឹមសារមេរៀននេះឡើងវិញ។ សូមចុចប៊ូតុងខាងក្រោមដើម្បីព្យាយាមម្តងទៀត ឬបន្តទៅមេរៀនបន្ទាប់។"
                 else:
                     # Save to persistent disk cache for all future users
-                    LessonCache.set(course_key, lesson_num, "km", sanitized)
+                    LessonCache.set(course_key, lesson_num, cache_lang_key, sanitized)
 
             user_state = state_manager.get_state(chat_id)
-            user_state.add_turn(role="user", content=f"Lesson Request: {lesson_title}")
+            user_state.add_turn(role="user", content=f"Lesson Request ({learning_mode}): {lesson_title}")
             user_state.add_turn(role="model", content=sanitized)
+
+            # Update Student Course Progress & Active Socratic Challenge
+            StudentManager.update_course_progress(user.id, course_key, lesson_num)
+            if learning_mode == "socratic":
+                StudentManager.set_active_exercise(user.id, {
+                    "course_key": course_key,
+                    "lesson_num": lesson_num,
+                    "lesson_title": lesson_title,
+                    "prompt": sanitized[:400]
+                })
 
             # Safe async notification to admin
             try:
                 await SystemMonitor.notify_admin_live_activity(
                     bot=context.bot,
                     user=update.effective_user,
-                    query=f"Requested Lesson: {lesson_title}",
+                    query=f"Requested Lesson ({learning_mode}): {lesson_title}",
                     response=sanitized
                 )
             except Exception as admin_err:
@@ -940,6 +999,9 @@ async def handle_callback_query(update: Update, context: ContextTypes.DEFAULT_TY
                 [
                     InlineKeyboardButton("📖 មេរៀនបន្ទាប់ ▶", callback_data=f"lesson:{course_key}:{min(100, lesson_num+1)}"),
                     InlineKeyboardButton("📚 បញ្ជីមេរៀន", callback_data=f"course:{course_key}:{(lesson_num-1)//10+1}")
+                ],
+                [
+                    InlineKeyboardButton("🎓 មើលកាតពិន្ទុ (/study)", callback_data="study_profile")
                 ]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1018,8 +1080,70 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     chat_id = update.effective_chat.id
-    await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
+    # Check if student is responding to an active Socratic challenge
+    active_ex = StudentManager.get_active_exercise(user.id)
+    if active_ex and not user_query.startswith("/"):
+        await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+
+        eval_result = await ReviewerAgent.evaluate_student_understanding(
+            student_answer=user_query,
+            exercise_title=active_ex.get("lesson_title", "Socratic Challenge"),
+            lesson_context=active_ex.get("prompt", ""),
+            architect_agent=architect_agent
+        )
+
+        points_earned = eval_result.get("points", 15)
+        passed = eval_result.get("passed", True)
+        feedback_content = eval_result.get("feedback", "")
+
+        # Atomically record exercise result in StudentManager
+        res = StudentManager.record_exercise_result(
+            user_id=user.id,
+            points=points_earned,
+            exercise_title=active_ex.get("lesson_title", "Socratic Challenge"),
+            feedback=feedback_content,
+            passed=passed
+        )
+
+        c_key = active_ex.get("course_key", "gemini")
+        l_num = active_ex.get("lesson_num", 1)
+        next_l_num = min(100, l_num + 1)
+
+        eval_header = (
+            f"🏆 <b>ពិន្ទុថ្មី ៖</b> <b>+{points_earned} ពិន្ទុ</b> (ពិន្ទុសរុប៖ <b>{res['new_score']} ពិន្ទុ</b>)\n"
+            f"🎖️ <b>កម្រិតសមត្ថភាព ៖</b> {res['level_emoji']} <b>{res['level_title']}</b>\n"
+            f"📝 <b>លំហាត់បានបញ្ចប់សរុប ៖</b> <b>{res['completed_count']} លំហាត់</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        )
+        full_eval_response = eval_header + feedback_content
+
+        keyboard = [
+            [
+                InlineKeyboardButton("📖 មេរៀនបន្ទាប់ ▶", callback_data=f"lesson:{c_key}:{next_l_num}"),
+                InlineKeyboardButton("🎓 មើលកាតពិន្ទុ (/study)", callback_data="study_profile")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        user_state = state_manager.get_state(chat_id)
+        user_state.add_turn(role="user", content=f"Student Solution: {user_query}")
+        user_state.add_turn(role="model", content=full_eval_response)
+
+        try:
+            await SystemMonitor.notify_admin_live_activity(
+                bot=context.bot,
+                user=user,
+                query=f"Socratic Submission for {active_ex.get('lesson_title')}: {user_query[:60]}",
+                response=full_eval_response
+            )
+        except Exception:
+            pass
+
+        await send_long_message(update.message, full_eval_response, reply_markup=reply_markup)
+        return
+
+    await context.bot.send_chat_action(chat_id=chat_id, action="typing")
 
     user_state = state_manager.get_state(chat_id)
     intent = evaluator_agent.analyze(user_query)
@@ -1046,6 +1170,8 @@ def setup_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("ai", ai_courses_command))
     application.add_handler(CommandHandler("courses", ai_courses_command))
+    application.add_handler(CommandHandler("study", study_command))
+    application.add_handler(CommandHandler("socratic", study_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("reset", reset_command))
     

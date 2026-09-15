@@ -12,15 +12,21 @@ import re
 import py_compile
 from pathlib import Path
 
-# Ensure project root is in sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Ensure UTF-8 output on Windows consoles
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 from config import Config
 from core.reviewer import ReviewerAgent
 from core.curriculum import CurriculumEngine, AI_COURSES, AI_COURSE_MODULES, LESSON_SUBTOPICS
 from core.admin import SystemMonitor
 from bot.handlers import is_admin
+from core.student_manager import StudentManager
 
 
 class SystemAuditor:
@@ -67,6 +73,7 @@ class SystemAuditor:
             PROJECT_ROOT / "core" / "lesson_cache.py",
             PROJECT_ROOT / "core" / "novel_18_cache.py",
             PROJECT_ROOT / "core" / "novel_continuity.py",
+            PROJECT_ROOT / "core" / "student_manager.py",
             PROJECT_ROOT / "memory" / "state_manager.py",
         ]
 
@@ -377,6 +384,84 @@ content: Master AI prompt template
             self.log_fail("METAPHYSICS_STANDARDS.md", "Missing METAPHYSICS_STANDARDS.md at workspace root!")
 
     # =========================================================================
+    # 8. SOCRATIC LEARNING MODE & STUDENT PROGRESS DATABASE AUDIT
+    # =========================================================================
+    def audit_socratic_learning_and_student_database(self):
+        print("\n" + "=" * 65)
+        print("8. AUDITING SOCRATIC LEARNING MODES & STUDENT DATABASE")
+        print("=" * 65)
+
+        # A. Verify User Isolation by Telegram ID
+        user_a_id = 999111999
+        user_b_id = 999222999
+
+        # Ensure fresh state
+        StudentManager._load_db()
+        StudentManager._students.pop(str(user_a_id), None)
+        StudentManager._students.pop(str(user_b_id), None)
+
+        student_a = StudentManager.get_or_create_student(user_a_id, name="Student A", username="student_a")
+        student_b = StudentManager.get_or_create_student(user_b_id, name="Student B", username="student_b")
+
+        if student_a["user_id"] == user_a_id and student_b["user_id"] == user_b_id:
+            self.log_pass("Student ID Isolation", "Separate records maintained for distinct Telegram IDs")
+        else:
+            self.log_fail("Student ID Isolation", "Telegram IDs collided or overwritten!")
+
+        # B. Verify Mode Switching
+        mode_set = StudentManager.set_learning_mode(user_a_id, "explanatory")
+        if mode_set == "explanatory" and StudentManager.get_learning_mode(user_a_id) == "explanatory":
+            self.log_pass("Learning Mode Toggle (Explanatory)", "User A mode changed to explanatory")
+        else:
+            self.log_fail("Learning Mode Toggle (Explanatory)", "Failed to set explanatory mode")
+
+        mode_b = StudentManager.get_learning_mode(user_b_id)
+        if mode_b == "socratic":
+            self.log_pass("Isolated Mode Integrity", "User B mode remained socratic without cross-contamination")
+        else:
+            self.log_fail("Isolated Mode Integrity", f"User B mode corrupted to {mode_b}")
+
+        # C. Verify Scoring & Level Progression
+        res = StudentManager.record_exercise_result(
+            user_id=user_a_id,
+            points=60,
+            exercise_title="Recursion Test Lab",
+            feedback="Good effort",
+            passed=True
+        )
+        if res["new_score"] >= 60 and res["level"] == "Apprentice":
+            self.log_pass("Score Award & Level Progression", f"Points {res['new_score']} -> Level {res['level']}")
+        else:
+            self.log_fail("Score Award & Level Progression", f"Incorrect calculation: {res}")
+
+        # D. Verify Socratic Scaffold in Prompt
+        socratic_prompt = CurriculumEngine.generate_lesson_prompt("gemini", 1, mode="socratic")
+        if "TODO" in socratic_prompt or "សរសេរកូដនៅទីនេះ" in socratic_prompt:
+            self.log_pass("Socratic Code Scaffold", "Scaffolding placeholder present in Socratic prompt")
+        else:
+            self.log_fail("Socratic Code Scaffold", "Missing code scaffolding placeholder in Socratic prompt")
+
+        # E. Verify Explanatory Mode Length Mandate
+        expl_prompt = CurriculumEngine.generate_lesson_prompt("gemini", 1, mode="explanatory")
+        if "2,000 and 2,500" in expl_prompt:
+            self.log_pass("Explanatory Length Mandate", "2,000 to 2,500 chars mandate enforced")
+        else:
+            self.log_fail("Explanatory Length Mandate", "Missing 2,000-2,500 chars mandate in prompt")
+
+        # F. Verify /study in main.py user_commands
+        main_py = (PROJECT_ROOT / "main.py").read_text(encoding="utf-8")
+        if 'BotCommand("study"' in main_py:
+            self.log_pass("/study Command Registration", "Registered in public user_commands menu")
+        else:
+            self.log_fail("/study Command Registration", "Missing /study in user_commands menu")
+
+        # Cleanup dummy audit test records
+        StudentManager._students.pop(str(user_a_id), None)
+        StudentManager._students.pop(str(user_b_id), None)
+        StudentManager._students.pop("111", None)
+        StudentManager._save_db()
+
+    # =========================================================================
     # RUN ALL AUDITS & REPORT
     # =========================================================================
     def run_all_audits(self) -> bool:
@@ -391,6 +476,7 @@ content: Master AI prompt template
         self.audit_curriculum_engine_and_anti_repetition()
         self.audit_system_health_metrics()
         self.audit_constitutional_charters()
+        self.audit_socratic_learning_and_student_database()
 
         print("\n" + "=" * 65)
         print("FINAL AUDIT SUMMARY REPORT")

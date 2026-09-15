@@ -22,6 +22,24 @@ class UserState:
         self.user_language: str = "en"
         self.mastery_level: str = "intermediate"
         self.last_active: float = time.time()
+        
+        # Socratic vs Explanatory Learning Mode (Synced with persistent StudentManager)
+        try:
+            from core.student_manager import StudentManager
+            self.learning_mode: str = StudentManager.get_learning_mode(chat_id)
+        except Exception:
+            self.learning_mode: str = "socratic"
+
+    def set_learning_mode(self, mode: str) -> str:
+        """Updates learning mode and persists to StudentManager."""
+        clean_mode = "explanatory" if "explan" in mode.lower() or "master" in mode.lower() else "socratic"
+        self.learning_mode = clean_mode
+        try:
+            from core.student_manager import StudentManager
+            StudentManager.set_learning_mode(self.chat_id, clean_mode)
+        except Exception:
+            pass
+        return self.learning_mode
 
     def add_turn(self, role: str, content: str) -> None:
         """Adds a turn to conversation history and manages sliding window context."""
@@ -61,6 +79,14 @@ class UserState:
     def get_formatted_context(self) -> str:
         """Generates context block to prepend to prompt."""
         context_parts = []
+        
+        # Include active Student Cognitive State
+        context_parts.append(
+            f"[STUDENT COGNITIVE STATE]\n"
+            f"- Active Learning Mode: {self.learning_mode.upper()}\n"
+            f"- Mastery Level: {self.mastery_level.capitalize()}"
+        )
+
         if self.summary:
             context_parts.append(f"[LONG TERM MEMORY SUMMARY]\n{self.summary}")
 

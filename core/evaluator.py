@@ -10,6 +10,7 @@ class IntentAnalysis:
     mode: str  # "Explanation", "Architecture/Code", "Socratic Dialogue", "Philosophical"
     language_hint: str  # "en", "km", "fr", etc.
     requires_code: bool
+    is_socratic_submission: bool = False
 
 
 class EvaluatorAgent:
@@ -68,10 +69,17 @@ class EvaluatorAgent:
             cognitive_depth = "Intermediate"
             mode = "Explanation"
 
+        is_socratic_submission = any(
+            pattern in query_lower for pattern in [
+                "todo", "def ", "return ", "class ", "/*", "*/", "answer:", "ចម្លើយ", "កូដ", "code:"
+            ]
+        ) and (requires_code or len(query) > 30)
+
         return IntentAnalysis(
             domain=domain,
             cognitive_depth=cognitive_depth,
             mode=mode,
             language_hint=language_hint,
             requires_code=requires_code,
+            is_socratic_submission=is_socratic_submission,
         )

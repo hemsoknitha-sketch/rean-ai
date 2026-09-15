@@ -251,16 +251,47 @@ class CurriculumEngine:
         return f"Lesson {lesson_num} (Module {module_num}: {module_name} - {sub_topic})"
 
     @staticmethod
-    def generate_lesson_prompt(course_key: str, lesson_num: int, lang: str = "km") -> str:
-        """Generates detailed prompt for Architect agent to deliver an elite 3000-3500 character masterclass."""
+    def generate_lesson_prompt(course_key: str, lesson_num: int, lang: str = "km", mode: str = "socratic") -> str:
+        """Generates detailed prompt for Architect agent.
+        
+        Supports two pedagogical modes:
+        - 'explanatory': Explanatory/Masterclass Mode (2,000 - 2,500 chars) with complete deconstruction.
+        - 'socratic': Interactive Socratic Mode (Core intuition + 1,000-1,500 chars of code scaffolds
+                      with placeholders '/* សរសេរកូដនៅទីនេះ */' or '# TODO: បំពេញកូដនៅទីនេះ',
+                      step-by-step diagnostic questions, and score evaluation setup).
+        """
         course_info = AI_COURSES.get(course_key, AI_COURSES["gemini"])
         course_title = course_info["title"]
         lesson_title = CurriculumEngine.get_lesson_title(course_key, lesson_num, lang)
 
+        is_socratic = "socratic" in mode.lower()
+
+        mode_instructions = ""
+        if is_socratic:
+            mode_instructions = (
+                "MODE: INTERACTIVE SOCRATIC LEARNING MODE (របៀបសូក្រាតអន្តរកម្ម)\n"
+                "- TARGET LENGTH: You MUST generate a comprehensive, highly detailed masterclass between 3,000 and 3,500 characters in length.\n"
+                "- ARCHITECTURAL BREAKDOWN:\n"
+                "  1. Core Principles Intuition (1,500 - 2,000 characters): Deconstruct fundamental concepts from first principles.\n"
+                "  2. Interactive Socratic Code Scaffolding & Diagnostic Exercise (1,000 - 1,500 characters):\n"
+                "     • Provide real-world code scaffolding where critical logic is replaced by standard placeholders:\n"
+                "       `/* សរសេរកូដនៅទីនេះ */` (for JS/C/SQL) or `# TODO: បំពេញកូដនៅទីនេះ` (for Python).\n"
+                "     • Add an explicit diagnostic question testing the student's step-by-step understanding.\n"
+                "     • Instruct the student to reply directly in chat with their completed code/answer to be evaluated for up to +20 Score Points (ពិន្ទុវាយតម្លៃកម្រិតចំណេះដឹង).\n"
+                "     • Format the exercise clearly under section '៦. លំហាត់ស្ទង់កម្រិតសមត្ថភាពសូក្រាត (Interactive Socratic Challenge)'.\n"
+            )
+        else:
+            mode_instructions = (
+                "MODE: EXPLANATORY / MASTERCLASS MODE (របៀបពន្យល់ក្បោះក្បាយ)\n"
+                "- TARGET LENGTH: You MUST generate a comprehensive, pristine masterclass between 2,000 and 2,500 characters.\n"
+                "- Deliver complete, self-contained technical instruction, fully working 100% complete code blocks, and no placeholders.\n"
+            )
+
         prompt = (
-            f"You are the Supreme Polymath AI Grandmaster delivering an elite, masterclass tutorial.\n\n"
+            f"You are the Supreme Polymath AI Grandmaster delivering an elite tutorial.\n\n"
             f"Course: {course_title}\n"
             f"Target Lesson: {lesson_title}\n\n"
+            f"{mode_instructions}\n"
             f"STRICT LANGUAGE PURITY MANDATE:\n"
             f"1. You MUST use 100% full, rich, natural Khmer language adhering to the Samdech Chuon Nath Dictionary for all explanations, descriptions, and pedagogical guidance.\n"
             f"2. You are ONLY permitted to attach technical terms in English inside parentheses right after their Khmer equivalents, e.g. 'គំរូភាសាធំៗ (Large Language Models)', 'មូលដ្ឋានទិន្នន័យវ៉ិចទ័រ (Vector Databases)'.\n"
@@ -269,9 +300,6 @@ class CurriculumEngine:
             f"1. Absolutely NO repeated quotes or generic clichés across lessons (e.g. never use canned quotes like 'នៅក្នុងយុគសម័យឌីជីថល...', 'ចំណេះដឹងគឺជា...', 'នៅក្នុងសម័យកាលបច្ចេកវិទ្យា...').\n"
             f"2. Every lesson MUST have its own fresh, original, highly specific First-Principles deconstruction tailored strictly to '{lesson_title}'.\n"
             f"3. Never output generic boilerplate or filler phrases. Maintain dense, high-value technical instruction from the very first line.\n\n"
-            f"LENGTH MANDATE:\n"
-            f"- TARGET LENGTH: You MUST generate a comprehensive, highly detailed lesson between 3,000 and 3,500 characters in length.\n"
-            f"- No rushed summaries, no abbreviations, no omitted steps, and zero placeholder comments (never use '# TODO' or '# Add code here').\n\n"
             f"THE 6-PILLAR GRANDMASTER CURRICULUM ARCHITECTURE:\n"
             f"Organize your entire lesson strictly using the following 6 numbered sections:\n\n"
             f"១. សេចក្តីផ្តើម និងគោលបំណងស្នូល (Overview & Core Objectives):\n"
@@ -286,11 +314,10 @@ class CurriculumEngine:
             f"• ពន្យល់ពីគន្លឹះសរសេរ Prompt ឱ្យចេញលទ្ធផលត្រឹមត្រូវបំផុត (Role, Context, Task, Delimiters, Few-shot Examples, Constraints)។\n"
             f"• ផ្តល់គំរូ Prompt ជាក់ស្តែងដែលរៀបចំទុកជាមុន ងាយស្រួល Copy យកទៅប្រើភ្លាមៗ។\n\n"
             f"៥. កូដគំរូ និង Prompt ជាក់ស្តែង Copiedable Super Smart (Complete Ready-to-Run Code & Prompts):\n"
-            f"• ផ្តល់កូដពេញលេញ 100% (Working Python/JS/Bash script) ក្នុង code block (```python ... ```) ដែលអាច Copy យកទៅ Run បានភ្លាមដោយគ្មាន Error។\n"
+            f"• ផ្តល់កូដជាក់ស្តែង (Python/JS/Bash script) ក្នុង code block (```python ... ```) ដែលងាយស្រួល Copy យកទៅអនុវត្ត។\n"
             f"• ផ្តល់ Master Prompt គំរូពេញលេញក្នុង code block (```yaml ... ``` ឬ ```markdown ... ```) សម្រាប់អ្នករៀនយកទៅ Paste ក្នុង ChatGPT, Gemini, ឬ Claude បានភ្លាម។\n\n"
             f"៦. ការអនុវត្តជាក់ស្តែង និងសំណួរឆ្លុះបញ្ចាំង (Hands-on Lab & Socratic Reflection):\n"
-            f"• លំហាត់អនុវត្តខ្នាតតូចសម្រាប់អ្នករៀនសាកល្បងដោយខ្លួនឯង។\n"
-            f"• សំណួរគិតពិចារណា (Socratic Question) ដើម្បីពង្រឹងការយល់ដឹងស៊ីជម្រៅ។\n"
+            f"{'• ផ្តល់គ្រោងកូដ Scaffolding ដែលមានចន្លោះ `# TODO: បំពេញកូដនៅទីនេះ` ឬ `/* សរសេរកូដនៅទីនេះ */` រួមជាមួយសំណួរស្ទង់ការយល់ដឹងមួយជំហានម្តងៗ ព្រមទាំងប្រាប់សិស្សឱ្យ reply ចម្លើយដើម្បីទទួលបានពិន្ទុរហូតដល់ +20 Score Points។' if is_socratic else '• លំហាត់អនុវត្តខ្នាតតូចសម្រាប់អ្នករៀនសាកល្បងដោយខ្លួនឯង និងសំណួរគិតពិចារណា (Socratic Question) ដើម្បីពង្រឹងការយល់ដឹងស៊ីជម្រៅ។'}\n"
             f"• ការណែនាំឱ្យចុចប៊ូតុង '📖 មេរៀនបន្ទាប់ ▶' សម្រាប់មេរៀនទី {min(100, lesson_num + 1)}។\n\n"
             f"FORMATTING & AESTHETIC DIRECTIVES:\n"
             f"- Use numbered sections (១. , ២. , ៣. ), bullet points (•), and relevant emojis (🔮, 🚀, 💡, ⚙️, 📋, 🎯).\n"

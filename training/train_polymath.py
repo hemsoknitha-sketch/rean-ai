@@ -1,5 +1,6 @@
 """Unsloth + QLoRA Training script for fine-tuning Polymath AI Grandmaster models.
 
+DEDICATED USAGE: Strictly reserved for creating offline Local Ollama GGUF models ($0 API backup).
 This script is designed for Google Colab (Free T4/L4 GPU) or local Linux/Windows GPU setups.
 It uses Unsloth for 80% memory reduction and 2x faster throughput during fine-tuning.
 """
